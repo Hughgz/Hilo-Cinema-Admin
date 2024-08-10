@@ -17,7 +17,7 @@ export const fetchCustomersFailure = (error) => ({
 export const fetchCustomers = () => {
   return (dispatch) => {
     dispatch(fetchCustomersRequest());
-    return axios.get("http://localhost:5005/api/CustomerService")
+    return axios.get("https://localhost:8000/api/Customers")
       .then(response => {
         dispatch(fetchCustomersSuccess(response.data));
       })

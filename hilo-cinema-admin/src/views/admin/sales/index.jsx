@@ -10,10 +10,11 @@ import {
   Text,
   useColorModeValue,
   SimpleGrid,
+  Select,
 } from "@chakra-ui/react";
 
 // Custom components
-import HistoryItem from "views/admin/marketplace/components/HistoryItem";
+import HistoryItem from "views/admin/sales/components/HistoryItem";
 import NFT from "components/card/NFT";
 import Card from "components/card/Card.js";
 
@@ -28,12 +29,14 @@ import Avatar1 from "assets/img/avatars/avatar1.png";
 import Avatar2 from "assets/img/avatars/avatar2.png";
 import Avatar3 from "assets/img/avatars/avatar3.png";
 import Avatar4 from "assets/img/avatars/avatar4.png";
-import tableDataConcessions from "views/admin/marketplace/variables/tableDataConcessions.json";
+import tableDataConcessions from "views/admin/sales/variables/tableDataConcessions.json";
 import { useDispatch, useSelector } from "react-redux";
 import TopCreatorTable from "./components/TableTopCreators";
 import { fetchCustomers } from "reduxHilo/actions/customerAction";
+import Banner from "./components/Banner";
 
-export default function Marketplace() {
+
+export default function Sales() {
   // Chakra Color Mode
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const textColorBrand = useColorModeValue("brand.500", "white");
@@ -56,9 +59,26 @@ export default function Marketplace() {
         <Flex
           flexDirection='column'
           gridArea={{ xl: "1 / 1 / 2 / 3", "2xl": "1 / 1 / 2 / 2" }}>
-            
-          {/* <Banner /> */}
-          <Flex direction='column'>
+           {/* Combo Boxes */}
+           <Flex mb={4}>
+            <Select placeholder="Select Cinema" mr={4}>
+              <option value="galaxy">Galaxy</option>
+              <option value="cgv">CGV</option>
+              <option value="lotte">Lotte</option>
+            </Select>
+            <Select placeholder="Select Movie" mr={4}>
+              <option value="avengers">Avengers</option>
+              <option value="batman">Batman</option>
+              <option value="spiderman">Spider-Man</option>
+            </Select>
+            <Select placeholder="Select Time">
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="evening">Evening</option>
+            </Select>
+          </Flex>
+          <Banner></Banner>
+          <Flex direction='column' mt={20}>
             <Flex
               mt='45px'
               mb='20px'

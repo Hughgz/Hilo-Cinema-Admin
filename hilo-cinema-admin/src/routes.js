@@ -19,7 +19,7 @@ import Salary from "views/admin/salary";
 
 // Auth Imports
 import SignInCentered from "views/auth/signIn";
-import Marketplace from "views/admin/marketplace";
+import Sales from "views/admin/sales";
 import UserManagement from "views/admin/users";
 
 import Movies from "views/admin/stock/components/movie";
@@ -97,7 +97,7 @@ const routes = [
     layout: "/admin",
     path: "/sale-management",
     icon: <Icon as={MdAccountBalance} width='20px' height='20px' color='inherit' />,
-    component: Marketplace,
+    component: Sales,
   },
   {
     name: "Time Management",

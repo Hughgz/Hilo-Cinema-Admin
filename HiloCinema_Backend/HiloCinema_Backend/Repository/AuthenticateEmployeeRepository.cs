@@ -38,7 +38,7 @@ namespace HiloCinema_Backend.Repository
 
         public async Task<Employee> GetEmployeeByEmail(string email)
         {
-            var employee = _context.Employees.SingleOrDefault(c => c.Email == email);
+            var employee = _context.Employees.FirstOrDefault(c => c.Email == email);
             if (employee == null)
             {
                 throw new Exception("Employee not found");

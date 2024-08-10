@@ -17,7 +17,7 @@ import {
 // Custom components
 import Card from "components/card/Card";
 import Menu from "components/menu/MainMenu";
-import { fetchEmployees } from "reduxHilo/actions/employeeAction";
+import { fetchEmployees, updateEmployeeStatus } from "reduxHilo/actions/employeeAction";
 import { useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
 
 export default function DevelopmentTable(props) {
@@ -38,7 +38,7 @@ export default function DevelopmentTable(props) {
 
   const positions = useMemo(() => {
     const posSet = new Set();
-    employees.forEach(employee => {
+    employees.forEach((employee) => {
       if (employee.position) {
         posSet.add(employee.position);
       }
@@ -47,12 +47,14 @@ export default function DevelopmentTable(props) {
   }, [employees]);
 
   const data = useMemo(() => {
-    if (filterInput) {
-      return employees.filter((employee) =>
-        employee.position && employee.position.toLowerCase().includes(filterInput.toLowerCase())
+    return employees
+      .filter((employee) => employee.status !== "Inactive") // Exclude inactive employees
+      .filter((employee) =>
+        filterInput
+          ? employee.position &&
+            employee.position.toLowerCase().includes(filterInput.toLowerCase())
+          : true
       );
-    }
-    return employees;
   }, [employees, filterInput]);
 
   const handleEdit = (row) => {
@@ -60,23 +62,29 @@ export default function DevelopmentTable(props) {
   };
 
   const handleDelete = (row) => {
-    console.log("Delete", row.original);
-    // Add your delete logic here
+    dispatch(updateEmployeeStatus(row.original.id));
   };
 
-  const columnsWithActions = useMemo(() => [
-    ...columns,
-    {
-      Header: "Actions",
-      accessor: "actions",
-      Cell: ({ row }) => (
-        <div>
-          <Button onClick={() => handleEdit(row)} mr="10px">Edit</Button>
-          <Button onClick={() => handleDelete(row)} colorScheme="red">Delete</Button>
-        </div>
-      ),
-    },
-  ], [columns]);
+  const columnsWithActions = useMemo(
+    () => [
+      ...columns,
+      {
+        Header: "Actions",
+        accessor: "actions",
+        Cell: ({ row }) => (
+          <div>
+            <Button onClick={() => handleEdit(row)} mr="10px">
+              Edit
+            </Button>
+            <Button onClick={() => handleDelete(row)} colorScheme="red">
+              Hidden
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [columns]
+  );
 
   const tableInstance = useTable(
     {

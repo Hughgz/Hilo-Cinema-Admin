@@ -66,7 +66,13 @@ namespace HiloCinema_Backend.Controllers
             existingEmployee.Phone = updatedEmployee.Phone;
             existingEmployee.Gender = updatedEmployee.Gender;
             existingEmployee.Birthdate = updatedEmployee.Birthdate;
-            existingEmployee.Password = PasswordHasher.HashPassword(updatedEmployee.Password);
+
+            // Chỉ cập nhật mật khẩu nếu có mật khẩu mới được cung cấp
+            if (!string.IsNullOrEmpty(updatedEmployee.Password))
+            {
+                existingEmployee.Password = PasswordHasher.HashPassword(updatedEmployee.Password);
+            }
+
             existingEmployee.Position = updatedEmployee.Position;
             existingEmployee.SysRole = updatedEmployee.SysRole;
             existingEmployee.Token = updatedEmployee.Token;
@@ -96,14 +102,43 @@ namespace HiloCinema_Backend.Controllers
 
         // POST: api/Employees
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/Employees
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee([FromBody] EmployeeDTO newEmployeeDTO)
         {
-            _context.Employees.Add(employee);
+            if (newEmployeeDTO == null)
+            {
+                return BadRequest(new { message = "Invalid employee data." });
+            }
+
+            // Kiểm tra xem email đã tồn tại hay chưa
+            if (_context.Employees.Any(e => e.Email == newEmployeeDTO.Email))
+            {
+                return BadRequest(new { message = "Email already exists. Please try another email." });
+            }
+
+            var newEmployee = new Employee
+            {
+                Name = newEmployeeDTO.Name,
+                Email = newEmployeeDTO.Email,
+                Address = newEmployeeDTO.Address,
+                Phone = newEmployeeDTO.Phone,
+                Gender = newEmployeeDTO.Gender,
+                Birthdate = newEmployeeDTO.Birthdate,
+                Password = PasswordHasher.HashPassword(newEmployeeDTO.Password),
+                Position = newEmployeeDTO.Position,
+                SysRole = newEmployeeDTO.SysRole,
+                Token = newEmployeeDTO.Token,
+                CreatedDate = newEmployeeDTO.CreatedDate,
+                Status = newEmployeeDTO.Status
+            };
+
+            _context.Employees.Add(newEmployee);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
+            return CreatedAtAction("GetEmployee", new { id = newEmployee.Id }, newEmployee);
         }
+
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
@@ -125,5 +160,31 @@ namespace HiloCinema_Backend.Controllers
         {
             return _context.Employees.Any(e => e.Id == id);
         }
+        // PATCH: api/Employees/{id}/status
+        [HttpPut("hidden/{id}")]
+        public async Task<IActionResult> PatchEmployeeStatus(int id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                return NotFound(new { message = "Employee not found." });
+            }
+
+            employee.Status = "Inactive";
+
+            _context.Entry(employee).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+            return Ok(new { message = "Employee status updated successfully", employee });
+        }
+
     }
 }

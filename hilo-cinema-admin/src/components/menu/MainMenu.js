@@ -1,6 +1,5 @@
 import React from "react";
-
-// Chakra imports
+import { Link as RouterLink } from "react-router-dom"; // Import Link từ react-router-dom
 import {
   Icon,
   Flex,
@@ -12,13 +11,9 @@ import {
   useDisclosure,
   useColorModeValue,
 } from "@chakra-ui/react";
-// Assets
 import {
   MdOutlineMoreHoriz,
-  MdOutlinePerson,
-  MdOutlineCardTravel,
-  MdOutlineLightbulb,
-  MdOutlineSettings,
+  MdPeople
 } from "react-icons/md";
 
 export default function Banner(props) {
@@ -45,7 +40,6 @@ export default function Banner(props) {
     { bg: "whiteAlpha.100" }
   );
 
-  // Ellipsis modals
   const {
     isOpen: isOpen1,
     onOpen: onOpen1,
@@ -80,26 +74,8 @@ export default function Banner(props) {
         borderRadius='20px'
         p='15px'>
         <MenuItem
-          transition='0.2s linear'
-          color={textColor}
-          _hover={textHover}
-          p='0px'
-          borderRadius='8px'
-          _active={{
-            bg: "transparent",
-          }}
-          _focus={{
-            bg: "transparent",
-          }}
-          mb='10px'>
-          <Flex align='center'>
-            <Icon as={MdOutlinePerson} h='16px' w='16px' me='8px' />
-            <Text fontSize='sm' fontWeight='400'>
-              Panel 1
-            </Text>
-          </Flex>
-        </MenuItem>
-        <MenuItem
+          as={RouterLink} // Sử dụng RouterLink để tạo liên kết
+          to="/employee/add" // Đường dẫn đến trang thêm nhân viên
           transition='0.2s linear'
           p='0px'
           borderRadius='8px'
@@ -113,29 +89,9 @@ export default function Banner(props) {
           }}
           mb='10px'>
           <Flex align='center'>
-            <Icon as={MdOutlineCardTravel} h='16px' w='16px' me='8px' />
+            <Icon as={MdPeople} h='16px' w='16px' me='8px' />
             <Text fontSize='sm' fontWeight='400'>
-              Panel 2
-            </Text>
-          </Flex>
-        </MenuItem>
-        <MenuItem
-          transition='0.2s linear'
-          p='0px'
-          borderRadius='8px'
-          color={textColor}
-          _hover={textHover}
-          _active={{
-            bg: "transparent",
-          }}
-          _focus={{
-            bg: "transparent",
-          }}
-          mb='10px'>
-          <Flex align='center'>
-            <Icon as={MdOutlineLightbulb} h='16px' w='16px' me='8px' />
-            <Text fontSize='sm' fontWeight='400'>
-              Panel 3
+              Add Employee
             </Text>
           </Flex>
         </MenuItem>
@@ -152,9 +108,8 @@ export default function Banner(props) {
             bg: "transparent",
           }}>
           <Flex align='center'>
-            <Icon as={MdOutlineSettings} h='16px' w='16px' me='8px' />
             <Text fontSize='sm' fontWeight='400'>
-              Panel 4
+              See All
             </Text>
           </Flex>
         </MenuItem>

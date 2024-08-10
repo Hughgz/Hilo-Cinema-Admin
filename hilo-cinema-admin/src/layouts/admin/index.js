@@ -4,7 +4,7 @@ import routes from "routes.js";
 
 
 // Chakra imports
-import { Box, useColorModeValue, useDisclosure, Portal } from "@chakra-ui/react";
+import { Box, useDisclosure, Portal } from "@chakra-ui/react";
 
 // Layout components
 import { SidebarContext } from "contexts/SidebarContext";

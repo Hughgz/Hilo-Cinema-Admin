@@ -27,7 +27,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
-  const { colorMode, toggleColorMode } = useColorMode();
+  const { colorMode, toggleColorMode } = useColorMode()
   // Chakra Color Mode
   const navbarIcon = useColorModeValue("gray.400", "white");
   let menuBg = useColorModeValue("white", "navy.800");
@@ -53,7 +53,8 @@ export default function HeaderLinks(props) {
   const handleSignIn = () => {
     history.push('/auth/sign-in');
   };
-
+  console.log("toggleColorMode: ", toggleColorMode)
+  console.log("ColorMode: ", colorMode)
   return (
     <Flex
       w={{ sm: "100%", md: "auto" }}
@@ -150,7 +151,6 @@ export default function HeaderLinks(props) {
           as={colorMode === "light" ? IoMdMoon : IoMdSunny}
         />
       </Button>
-
       <Menu>
       <MenuButton p="0px">
           {token ? (
@@ -213,7 +213,7 @@ export default function HeaderLinks(props) {
         </MenuList>
       </Menu>
     </Flex>
-  );
+  );  
 }
 
 HeaderLinks.propTypes = {

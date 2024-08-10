@@ -8,10 +8,27 @@ import { sliderStyles } from "./components/slider";
 import { textareaStyles } from "./components/textarea";
 import { switchStyles } from "./components/switch";
 import { linkStyles } from "./components/link";
-import { breakpoints } from "./foundations/breakpoints";
 import { globalStyles } from "./styles";
+
+// Cấu hình useColorMode
+const config = {
+  initialColorMode: "light", // Chế độ mặc định là "light"
+  useSystemColorMode: false, // Không sử dụng chế độ của hệ thống
+};
+
+const breakpoints = {
+  sm: "320px",
+  md: "768px",
+  lg: "960px",
+  xl: "1200px",
+  "2xl": "1600px",
+};
+
 export default extendTheme(
-  { breakpoints }, // Breakpoints
+  {
+    config, // Thêm cấu hình useColorMode vào theme
+    breakpoints, // Định nghĩa trực tiếp breakpoints
+  },
   globalStyles,
   badgeStyles, // badge styles
   buttonStyles, // button styles

@@ -1,6 +1,9 @@
 import {
   FETCH_EMPLOYEES_REQUEST, FETCH_EMPLOYEES_SUCCESS, FETCH_EMPLOYEES_FAILURE,
-  EDIT_EMPLOYEE_SUCCESS, EDIT_EMPLOYEE_FAILURE
+  EDIT_EMPLOYEE_SUCCESS, EDIT_EMPLOYEE_FAILURE, ADD_EMPLOYEE_SUCCESS,
+  ADD_EMPLOYEE_FAILURE,
+  UPDATE_EMPLOYEE_STATUS_SUCCESS,
+  UPDATE_EMPLOYEE_STATUS_FAILURE
 } from '../types/type'
 
 const initialState = {
@@ -36,6 +39,28 @@ const employeeReducer = (state = initialState, action) => {
         ),
       };
     case EDIT_EMPLOYEE_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
+    case ADD_EMPLOYEE_SUCCESS:
+      return {
+        ...state,
+        employees: [...state.employees, action.payload],
+      };
+    case ADD_EMPLOYEE_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
+    case UPDATE_EMPLOYEE_STATUS_SUCCESS:
+      return {
+        ...state,
+        employees: state.employees.map(emp =>
+          emp.id === action.payload.id ? action.payload : emp
+        ),
+      };
+    case UPDATE_EMPLOYEE_STATUS_FAILURE:
       return {
         ...state,
         error: action.payload,
