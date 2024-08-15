@@ -2,7 +2,7 @@ import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from '../types/ty
 
 const initialState = {
   loading: false,
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: JSON.parse(localStorage.getItem('user')) || null, // Lưu toàn bộ thông tin employee vào user
   token: localStorage.getItem('token') || null,
   error: null,
 };
@@ -12,7 +12,13 @@ const authReducer = (state = initialState, action) => {
     case LOGIN_REQUEST:
       return { ...state, loading: true, error: null };
     case LOGIN_SUCCESS:
-      return { ...state, loading: false, user: action.payload.user, token: action.payload.token };
+      console.log("User data:", action.payload.user);
+      return {
+        ...state,
+        loading: false,
+        user: action.payload.user, // Lưu toàn bộ đối tượng employee vào user
+        token: action.payload.token,
+      };
     case LOGIN_FAILURE:
       return { ...state, loading: false, error: action.payload };
     case LOGOUT:

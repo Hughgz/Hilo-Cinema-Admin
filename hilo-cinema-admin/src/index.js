@@ -4,7 +4,7 @@ import "./assets/css/App.css";
 import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
 import AuthLayout from "layouts/auth";
 import AdminLayout from "layouts/admin";
-import { ChakraProvider, ColorModeScript } from "@chakra-ui/react"; // Thêm ColorModeScript vào đây
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import theme from "../src/theme/theme";
 import { allReducers } from "./reduxHilo/reducers/index.jsx";
 import { ThemeEditorProvider } from "@hypertheme-editor/chakra-ui";
@@ -13,6 +13,7 @@ import { applyMiddleware, legacy_createStore as createStore } from "redux";
 import { thunk } from "redux-thunk";
 import EditEmployeeForm from "views/admin/users/components/employees/components/EditEmployee";
 import AddEmployeeForm from "views/admin/users/components/employees/components/AddEmployee";
+import EditMovieForm from "views/admin/stock/components/movie/components/EditMovie";
 
 const store = createStore(allReducers, applyMiddleware(thunk));
 
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path={`/admin`} component={AdminLayout} />
             <Route path={`/edit-employee/:id`} component={EditEmployeeForm} />
             <Route path={`/employee/add`} component={AddEmployeeForm} />
+            <Route path={`/edit-movie/:id`} component={EditMovieForm} />
             <Redirect from="/" to="/admin" />
           </Switch>
         </HashRouter>

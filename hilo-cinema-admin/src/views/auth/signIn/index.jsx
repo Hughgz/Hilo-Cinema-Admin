@@ -40,16 +40,20 @@ function SignIn() {
 
   const dispatch = useDispatch();
   const history = useHistory();
-  const { loading, error, token } = useSelector(state => state.auth);
+  const { loading, error, token, user } = useSelector(state => state.auth);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(login({ email, password }));
   };
 
-  // Điều hướng đến trang chủ sau khi đăng nhập thành công
-  if (token) {
-    history.push('/admin');
+  // Điều hướng đến trang phù hợp sau khi đăng nhập thành công dựa trên sysRole
+  if (token && user) {
+    if (user.sysRole === 'admin') {
+      history.push('/admin');
+    } else {
+      history.push('/user-dashboard'); // Điều hướng đến trang dành cho người dùng
+    }
   }
 
   return (

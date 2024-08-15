@@ -1,22 +1,22 @@
 // Chakra imports
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import DevelopmentTable from "views/admin/stock/components/movie/components/DevelopmentTable";
-import CheckTable from "views/admin/stock/components/movie/components/CheckTable";
-import ColumnsTable from "views/admin/stock/components/movie/components/ColumnsTable";
-import ComplexTable from "views/admin/stock/components/movie/components/ComplexTable";
+import DevelopmentTable from "views/admin/stock/components/actor/components/DevelopmentTable";
+import CheckTable from "views/admin/stock/components/actor/components/CheckTable";
+import ColumnsTable from "views/admin/stock/components/actor/components/ColumnsTable";
+import ComplexTable from "views/admin/stock/components/actor/components/ComplexTable";
 import {
   columnsDataDevelopment,
   columnsDataCheck,
   columnsDataColumns,
   columnsDataComplex,
-} from "views/admin/stock/components/movie/variables/columnsData";
-import tableDataDevelopment from "views/admin/stock/components/movie/variables/tableDataDevelopment.json";
-import tableDataCheck from "views/admin/stock/components/movie/variables/tableDataCheck.json";
-import tableDataColumns from "views/admin/stock/components/movie/variables/tableDataColumns.json";
-import tableDataComplex from "views/admin/stock/components/movie/variables/tableDataComplex.json";
+} from "views/admin/stock/components/actor/variables/columnsData";
+import tableDataDevelopment from "views/admin/stock/components/actor/variables/tableDataDevelopment.json";
+import tableDataCheck from "views/admin/stock/components/actor/variables/tableDataCheck.json";
+import tableDataColumns from "views/admin/stock/components/actor/variables/tableDataColumns.json";
+import tableDataComplex from "views/admin/stock/components/actor/variables/tableDataComplex.json";
 import React from "react";
 
-export default function UserManagement() {
+export default function Actors() {
   // Chakra Color Mode
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>

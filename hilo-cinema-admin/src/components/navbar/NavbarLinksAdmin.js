@@ -44,7 +44,7 @@ export default function HeaderLinks(props) {
   const history = useHistory();
   const auth = useSelector(state => state.auth);
   const { user, token } = auth;
-
+  console.log("User from Redux store:", user);
   const handleLogout = () => {
     dispatch(logout());
     history.push('/auth/sign-in'); // Điều hướng đến trang đăng nhập sau khi đăng xuất
@@ -155,7 +155,7 @@ export default function HeaderLinks(props) {
       <MenuButton p="0px">
           {token ? (
             <Text fontSize="md" fontWeight="600" color={textColor}>
-              {user ? user.name : 'Loading...'}
+              {user && user.name ? user.name : 'Loading...'}
             </Text>
           ) : (
             <Link to="/auth/sign-in">

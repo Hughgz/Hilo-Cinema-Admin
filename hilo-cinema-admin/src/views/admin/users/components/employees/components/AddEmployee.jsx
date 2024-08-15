@@ -14,7 +14,8 @@ import {
   Stack,
   useColorModeValue,
   useToast,
-  Text
+  Text,
+  FormErrorMessage
 } from '@chakra-ui/react';
 
 const AddEmployeeForm = () => {
@@ -35,38 +36,81 @@ const AddEmployeeForm = () => {
     status: '',
   });
 
-  const [emailError, setEmailError] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    if (name === 'email') setEmailError('');
+    setErrors({ ...errors, [name]: '' });  // Clear error when user starts typing
+  };
+
+  const validate = () => {
+    let validationErrors = {};
+
+    if (!formData.name) {
+      validationErrors.name = 'Name is required';
+    }
+    if (!formData.email) {
+      validationErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      validationErrors.email = 'Email address is invalid';
+    }
+    if (!formData.phone) {
+      validationErrors.phone = 'Phone number is required';
+    }
+    if (!formData.address) {
+      validationErrors.address = 'Address is required';
+    }
+    if (!formData.gender) {
+      validationErrors.gender = 'Gender is required';
+    }
+    if (!formData.birthdate) {
+      validationErrors.birthdate = 'Birthdate is required';
+    }
+    if (!formData.password) {
+      validationErrors.password = 'Password is required';
+    }
+    if (!formData.position) {
+      validationErrors.position = 'Position is required';
+    }
+    if (!formData.sysRole) {
+      validationErrors.sysRole = 'System role is required';
+    }
+    if (!formData.status) {
+      validationErrors.status = 'Status is required';
+    }
+
+    return validationErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await dispatch(addEmployee(formData));
-      toast({
-        title: "Employee Added",
-        description: "The employee has been added successfully.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-      history.push('/admin/default');
-    } catch (error) {
-      // Assuming the backend error message for an existing email is standardized
-      if (error.response && error.response.data.message.includes('Email already exists')) {
-        setEmailError('Email already exists. Please try another email.');
-      } else {
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      try {
+        await dispatch(addEmployee(formData));
         toast({
-          title: "Error",
-          description: error.message || "An unexpected error occurred.",
-          status: "error",
+          title: "Employee Added",
+          description: "The employee has been added successfully.",
+          status: "success",
           duration: 5000,
           isClosable: true,
         });
+        history.push('/admin/default');
+      } catch (error) {
+        if (error.response && error.response.data.message.includes('Email already exists')) {
+          setErrors({ email: 'Email already exists. Please try another email.' });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message || "An unexpected error occurred.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
       }
     }
   };
@@ -93,7 +137,7 @@ const AddEmployeeForm = () => {
         </Heading>
         <form onSubmit={handleSubmit}>
           <Stack spacing={4}>
-            <FormControl id="name">
+            <FormControl id="name" isInvalid={errors.name}>
               <FormLabel>Name</FormLabel>
               <Input
                 type="text"
@@ -101,8 +145,9 @@ const AddEmployeeForm = () => {
                 value={formData.name}
                 onChange={handleChange}
               />
+              {errors.name && <FormErrorMessage>{errors.name}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="email" isInvalid={!!emailError}>
+            <FormControl id="email" isInvalid={errors.email}>
               <FormLabel>Email</FormLabel>
               <Input
                 type="email"
@@ -110,9 +155,9 @@ const AddEmployeeForm = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
-              {emailError && <Text color="red.500" mt={2}>{emailError}</Text>}
+              {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="phone">
+            <FormControl id="phone" isInvalid={errors.phone}>
               <FormLabel>Phone</FormLabel>
               <Input
                 type="text"
@@ -120,8 +165,9 @@ const AddEmployeeForm = () => {
                 value={formData.phone}
                 onChange={handleChange}
               />
+              {errors.phone && <FormErrorMessage>{errors.phone}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="address">
+            <FormControl id="address" isInvalid={errors.address}>
               <FormLabel>Address</FormLabel>
               <Input
                 type="text"
@@ -129,8 +175,9 @@ const AddEmployeeForm = () => {
                 value={formData.address}
                 onChange={handleChange}
               />
+              {errors.address && <FormErrorMessage>{errors.address}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="gender">
+            <FormControl id="gender" isInvalid={errors.gender}>
               <FormLabel>Gender</FormLabel>
               <Select
                 name="gender"
@@ -141,8 +188,9 @@ const AddEmployeeForm = () => {
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </Select>
+              {errors.gender && <FormErrorMessage>{errors.gender}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="birthdate">
+            <FormControl id="birthdate" isInvalid={errors.birthdate}>
               <FormLabel>Birthdate</FormLabel>
               <Input
                 type="date"
@@ -150,8 +198,9 @@ const AddEmployeeForm = () => {
                 value={formData.birthdate}
                 onChange={handleChange}
               />
+              {errors.birthdate && <FormErrorMessage>{errors.birthdate}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="password">
+            <FormControl id="password" isInvalid={errors.password}>
               <FormLabel>Password</FormLabel>
               <Input
                 type="password"
@@ -159,8 +208,9 @@ const AddEmployeeForm = () => {
                 value={formData.password}
                 onChange={handleChange}
               />
+              {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="position">
+            <FormControl id="position" isInvalid={errors.position}>
               <FormLabel>Position</FormLabel>
               <Select
                 name="position"
@@ -175,8 +225,9 @@ const AddEmployeeForm = () => {
                 <option value="Cleaner">Cleaner</option>
                 <option value="Security Guard">Security Guard</option>
               </Select>
+              {errors.position && <FormErrorMessage>{errors.position}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="sysRole">
+            <FormControl id="sysRole" isInvalid={errors.sysRole}>
               <FormLabel>System Role</FormLabel>
               <Select
                 name="sysRole"
@@ -192,8 +243,9 @@ const AddEmployeeForm = () => {
                 <option value="Cleaner">Cleaner</option>
                 <option value="Security Guard">Security Guard</option>
               </Select>
+              {errors.sysRole && <FormErrorMessage>{errors.sysRole}</FormErrorMessage>}
             </FormControl>
-            <FormControl id="status">
+            <FormControl id="status" isInvalid={errors.status}>
               <FormLabel>Status</FormLabel>
               <Select
                 name="status"
@@ -205,6 +257,7 @@ const AddEmployeeForm = () => {
                 <option value="Inactive">Inactive</option>
                 <option value="Pending">Pending</option>
               </Select>
+              {errors.status && <FormErrorMessage>{errors.status}</FormErrorMessage>}
             </FormControl>
             <Flex direction="row" justifyContent="space-between">
               <Button onClick={() => history.goBack()} colorScheme="gray" size="lg" w="48%">

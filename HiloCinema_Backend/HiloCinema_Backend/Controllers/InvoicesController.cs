@@ -24,8 +24,31 @@ namespace HiloCinema_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoices()
         {
-            return await _context.Invoices.ToListAsync();
+            var invoices = await _context.Invoices
+                .Include(i => i.Employee)
+                .Include(i => i.Schedule)
+                    .ThenInclude(s => s.Movie)
+                .Include(i => i.Schedule)
+                    .ThenInclude(s => s.Seats)
+                        .ThenInclude(seat => seat.Room)
+                            .ThenInclude(room => room.Theater)
+                .ToListAsync();
+
+            var result = invoices.Select(i => new
+            {
+                Employee = i.Employee.Name,
+                Movie = i.Schedule.Movie.Title,
+                Theater = i.Schedule.Seats.FirstOrDefault()?.Room.Theater.Name,
+                Room = i.Schedule.Seats.FirstOrDefault()?.Room.Name,
+                Date = i.Schedule.Date,
+                Time = i.Schedule.Time,
+                PaymentMethod = i.PaymentMethod,
+                Total = i.Total
+            });
+
+            return Ok(result);
         }
+
 
         // GET: api/Invoices/5
         [HttpGet("{id}")]

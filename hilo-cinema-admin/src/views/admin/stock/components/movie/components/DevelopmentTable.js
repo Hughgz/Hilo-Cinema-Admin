@@ -1,7 +1,8 @@
-/* eslint-disable */
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  Button,
   Flex,
-  Progress,
+  Select,
   Table,
   Tbody,
   Td,
@@ -10,28 +11,87 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react";
-// Custom components
-import Card from "components/card/Card";
-import { AndroidLogo, AppleLogo, WindowsLogo } from "components/icons/Icons";
-import Menu from "components/menu/MainMenu";
-import React, { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useGlobalFilter,
   usePagination,
   useSortBy,
   useTable,
 } from "react-table";
+import { fetchMovies } from "reduxHilo/actions/movieAction";
+import Card from "components/card/Card";
+import Menu from "components/menu/MovieMenu";
+import EditMovieForm from "./EditMovieModal";
 
 export default function DevelopmentTable(props) {
-  const { columnsData, tableData } = props;
-
+  const { columnsData } = props;
   const columns = useMemo(() => columnsData, [columnsData]);
-  const data = useMemo(() => tableData, [tableData]);
+
+  const dispatch = useDispatch();
+  const { loading, movies, error } = useSelector((state) => state.movie);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [filterInput, setFilterInput] = useState("");
+
+  useEffect(() => {
+    dispatch(fetchMovies());
+  }, [dispatch]);
+
+  const country = useMemo(() => {
+    const countrySet = new Set();
+    movies.forEach((movie) => {
+      if (movie.country) {
+        countrySet.add(movie.country);
+      }
+    });
+    return Array.from(countrySet);
+  }, [movies]);
+
+  const data = useMemo(() => {
+    return movies.filter((movie) =>
+      filterInput
+        ? movie.country &&
+          movie.country.toLowerCase().includes(filterInput.toLowerCase())
+        : true
+    );
+  }, [movies, filterInput]);
+
+  const handleEdit = (row) => {
+    setSelectedMovie(row.original);
+    onOpen();
+  };
+
+  const handleDelete = (row) => {
+    // dispatch(updateEmployeeStatus(row.original.id));
+  };
+
+  const columnsWithActions = useMemo(
+    () => [
+      ...columns,
+      {
+        Header: "Actions",
+        accessor: "actions",
+        Cell: ({ row }) => (
+          <div>
+            <Button onClick={() => handleEdit(row)} mr="10px">
+              Edit
+            </Button>
+            <Button onClick={() => handleDelete(row)} colorScheme="red">
+              Hidden
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [columns]
+  );
 
   const tableInstance = useTable(
     {
-      columns,
+      columns: columnsWithActions,
       data,
     },
     useGlobalFilter,
@@ -47,141 +107,95 @@ export default function DevelopmentTable(props) {
     prepareRow,
     initialState,
   } = tableInstance;
-  initialState.pageSize = 11;
+  initialState.pageSize = 5;
 
   const textColor = useColorModeValue("secondaryGray.900", "white");
-  const iconColor = useColorModeValue("secondaryGray.500", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+
   return (
-    <Card
-      direction='column'
-      w='100%'
-      px='0px'
-      overflowX={{ sm: "scroll", lg: "hidden" }}>
-      <Flex px='25px' justify='space-between' mb='20px' align='center'>
-        <Text
-          color={textColor}
-          fontSize='22px'
-          fontWeight='700'
-          lineHeight='100%'>
-          Movies
-        </Text>
-        <Menu />
-      </Flex>
-      <Table {...getTableProps()} variant='simple' color='gray.500' mb='24px'>
-        <Thead>
-          {headerGroups.map((headerGroup, index) => (
-            <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
-              {headerGroup.headers.map((column, index) => (
-                <Th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  pe='10px'
-                  key={index}
-                  borderColor={borderColor}>
-                  <Flex
-                    justify='space-between'
-                    align='center'
-                    fontSize={{ sm: "10px", lg: "12px" }}
-                    color='gray.400'>
-                    {column.render("Header")}
-                  </Flex>
-                </Th>
-              ))}
-            </Tr>
-          ))}
-        </Thead>
-        <Tbody {...getTableBodyProps()}>
-          {page.map((row, index) => {
-            prepareRow(row);
-            return (
-              <Tr {...row.getRowProps()} key={index}>
-                {row.cells.map((cell, index) => {
-                  let data = "";
-                  if (cell.column.Header === "NAME") {
-                    data = (
-                      <Text color={textColor} fontSize='sm' fontWeight='700'>
-                        {cell.value}
-                      </Text>
-                    );
-                  } else if (cell.column.Header === "TECH") {
-                    data = (
-                      <Flex align='center'>
-                        {cell.value.map((item, key) => {
-                          if (item === "apple") {
-                            return (
-                              <AppleLogo
-                                key={key}
-                                color={iconColor}
-                                me='16px'
-                                h='18px'
-                                w='15px'
-                              />
-                            );
-                          } else if (item === "android") {
-                            return (
-                              <AndroidLogo
-                                key={key}
-                                color={iconColor}
-                                me='16px'
-                                h='18px'
-                                w='16px'
-                              />
-                            );
-                          } else if (item === "windows") {
-                            return (
-                              <WindowsLogo
-                                key={key}
-                                color={iconColor}
-                                h='18px'
-                                w='19px'
-                              />
-                            );
-                          }
-                        })}
-                      </Flex>
-                    );
-                  } else if (cell.column.Header === "DATE") {
-                    data = (
-                      <Text color={textColor} fontSize='sm' fontWeight='700'>
-                        {cell.value}
-                      </Text>
-                    );
-                  } else if (cell.column.Header === "PROGRESS") {
-                    data = (
-                      <Flex align='center'>
-                        <Text
-                          me='10px'
-                          color={textColor}
-                          fontSize='sm'
-                          fontWeight='700'>
-                          {cell.value}%
-                        </Text>
-                        <Progress
-                          variant='table'
-                          colorScheme='brandScheme'
-                          h='8px'
-                          w='63px'
-                          value={cell.value}
-                        />
-                      </Flex>
-                    );
-                  }
-                  return (
-                    <Td
-                      {...cell.getCellProps()}
+    <>
+      <Card direction="column" w="100%" px="0px" overflowX={{ sm: "scroll", lg: "hidden" }}>
+        <Flex px="25px" justify="space-between" mb="20px" align="center">
+          <Text color={textColor} fontSize="22px" fontWeight="700" lineHeight="100%">
+            Movies
+          </Text>
+          <Menu></Menu>
+        </Flex>
+        <Flex mb="20px" px="25px" justify="space-between" align="center">
+          <Select
+            placeholder="Filter by country"
+            value={filterInput}
+            onChange={(e) => setFilterInput(e.target.value)}
+            maxW="300px"
+          >
+            {country.map((coun) => (
+              <option key={coun} value={coun}>
+                {coun}
+              </option>
+            ))}
+          </Select>
+        </Flex>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : error ? (
+          <Text color="red.500">{error}</Text>
+        ) : (
+          <Table {...getTableProps()} variant="simple" color="gray.500" mb="24px">
+            <Thead>
+              {headerGroups.map((headerGroup, index) => (
+                <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
+                  {headerGroup.headers.map((column, index) => (
+                    <Th
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      pe="10px"
                       key={index}
-                      fontSize={{ sm: "14px" }}
-                      minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                      borderColor='transparent'>
-                      {data}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            );
-          })}
-        </Tbody>
-      </Table>
-    </Card>
+                      borderColor={borderColor}
+                    >
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        fontSize={{ sm: "10px", lg: "12px" }}
+                        color="gray.400"
+                      >
+                        {column.render("Header")}
+                      </Flex>
+                    </Th>
+                  ))}
+                </Tr>
+              ))}
+            </Thead>
+            <Tbody {...getTableBodyProps()} color={textColor}>
+              {page.map((row, index) => {
+                prepareRow(row);
+                return (
+                  <Tr {...row.getRowProps()} key={index}>
+                    {row.cells.map((cell, index) => (
+                      <Td
+                        {...cell.getCellProps()}
+                        key={index}
+                        fontSize={{ sm: "14px" }}
+                        minW={{ sm: "150px", md: "200px", lg: "auto" }}
+                        borderColor="transparent"
+                      >
+                        {cell.render("Cell")}
+                      </Td>
+                    ))}
+                  </Tr>
+                );
+              })}
+            </Tbody>
+          </Table>
+        )}
+      </Card>
+
+      {selectedMovie && (
+        <EditMovieForm
+          isOpen={isOpen}
+          onClose={onClose}
+          movieId={selectedMovie.id}
+          fetchMovies={fetchMovies}
+        />
+      )}
+    </>
   );
 }

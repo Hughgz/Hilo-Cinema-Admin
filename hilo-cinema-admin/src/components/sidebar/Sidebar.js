@@ -24,9 +24,13 @@ import PropTypes from "prop-types";
 
 // Assets
 import { IoMenuOutline } from "react-icons/io5";
+import useCheckTokenExpiration from "hooks/useCheckTokenExpiration";
 
 function Sidebar(props) {
   const { routes } = props;
+
+  // Check token expiration on component mount
+  useCheckTokenExpiration();
 
   let variantChange = "0.2s linear";
   let shadow = useColorModeValue(
@@ -40,7 +44,7 @@ function Sidebar(props) {
   // SIDEBAR
   return (
     <Box display={{ sm: "none", xl: "block" }} w="100%" position='fixed' minH='100%'>
-      {/* Đây là sidebar tổng */}
+      {/* Sidebar content */}
       <Box
         bg={sidebarBg}
         transition={variantChange}
@@ -62,17 +66,19 @@ function Sidebar(props) {
   );
 }
 
-// FUNCTIONS
+// SidebarResponsive component
 export function SidebarResponsive(props) {
+
   let sidebarBackgroundColor = useColorModeValue("white", "navy.800");
   let menuColor = useColorModeValue("gray.400", "white");
-  // // SIDEBAR
+  // SIDEBAR
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
 
   const { routes } = props;
-  // let isWindows = navigator.platform.startsWith("Win");
-  //  BRAND
+
+  // Check token expiration on component mount
+  useCheckTokenExpiration();
 
   return (
     <Flex display={{ sm: "flex", xl: "none" }} alignItems='center'>
@@ -114,6 +120,7 @@ export function SidebarResponsive(props) {
     </Flex>
   );
 }
+
 // PROPS
 
 Sidebar.propTypes = {
