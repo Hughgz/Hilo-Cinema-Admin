@@ -6,7 +6,17 @@ import {
 } from "../../../../reduxHilo/actions/bookingAction";
 import { fetchSeatsByRoom } from "../../../../reduxHilo/actions/seatAction";
 import { useColorModeValue } from "@chakra-ui/system";
-import { useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button } from "@chakra-ui/react";
+import {
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "@chakra-ui/react";
 import AddSeatForm from "./AddSeatForm";
 
 export default function Banner({ roomId, rowNum, colNum }) {
@@ -30,7 +40,9 @@ export default function Banner({ roomId, rowNum, colNum }) {
   const seatTextColor = useColorModeValue("black", "white");
 
   const isSelected = (seat) => {
-    return selectedSeats.some((selectedSeat) => selectedSeat.name === seat?.name);
+    return selectedSeats.some(
+      (selectedSeat) => selectedSeat.name === seat?.name
+    );
   };
 
   const handleSeatClick = (seat) => {
@@ -50,22 +62,22 @@ export default function Banner({ roomId, rowNum, colNum }) {
       <div>
         <p style={{ color: "red" }}>{error}</p>
         <div className="flex justify-end mt-5">
-        <Button
-              bg="transparent"
-              color="blue.500"
-              border="1px solid"
-              borderColor="blue.500"
-              _hover={{ bg: "blue.500", color: "white" }}
-              _active={{ bg: "blue.600", color: "white" }}
-              borderRadius="md"
-              boxShadow="md"
-              px={6}
-              py={3}
-              w="full"
-              onClick={onSeatModalOpen} // Mở modal khi nhấn vào nút Add Room
-            >
-              Add Room
-            </Button>
+          <Button
+            bg="transparent"
+            color="blue.500"
+            border="1px solid"
+            borderColor="blue.500"
+            _hover={{ bg: "blue.500", color: "white" }}
+            _active={{ bg: "blue.600", color: "white" }}
+            borderRadius="md"
+            boxShadow="md"
+            px={6}
+            py={3}
+            w="full"
+            onClick={onSeatModalOpen} // Mở modal khi nhấn vào nút Add Room
+          >
+            Add Seat
+          </Button>
         </div>
         <Modal isOpen={isSeatModalOpen} onClose={onSeatModalClose} size="xl">
           <ModalOverlay />
@@ -73,7 +85,12 @@ export default function Banner({ roomId, rowNum, colNum }) {
             <ModalHeader>Add New Seat</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <AddSeatForm roomId={roomId} rowNum={rowNum} colNum={colNum} onClose={onSeatModalClose}/>
+              <AddSeatForm
+                roomId={roomId}
+                rowNum={rowNum}
+                colNum={colNum}
+                onClose={onSeatModalClose}
+              />
             </ModalBody>
             <ModalFooter>
               {/* <button onClick={onSeatModalClose} className="px-4 py-2 rounded bg-blue-500 text-white">
@@ -111,8 +128,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
             <ModalBody>
               <AddSeatForm roomId={roomId} rowNum={rowNum} colNum={colNum} />
             </ModalBody>
-            <ModalFooter>
-            </ModalFooter>
+            <ModalFooter></ModalFooter>
           </ModalContent>
         </Modal>
       </div>
@@ -179,11 +195,9 @@ export default function Banner({ roomId, rowNum, colNum }) {
                       let seatClass =
                         "border-gray-400 hover:bg-green-100 hover:border-green-500";
                       if (seat.type === "vip") {
-                        seatClass =
-                          "border-red-500 hover:bg-red-100 hover:border-red-500";
+                        seatClass = "text-white bg-red-500 border-red-500";
                       } else if (seat.type === "double") {
-                        seatClass =
-                          "border-blue-500 hover:bg-blue-100 hover:border-blue-500";
+                        seatClass = "text-white bg-blue-500 border-blue-500";
                       }
 
                       return (
@@ -233,7 +247,9 @@ export default function Banner({ roomId, rowNum, colNum }) {
             variant="outline"
             colorScheme="red"
             size="sm"
-            leftIcon={<span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>}
+            leftIcon={
+              <span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>
+            }
           >
             Ghế VIP
           </Button>
@@ -241,9 +257,43 @@ export default function Banner({ roomId, rowNum, colNum }) {
             variant="outline"
             colorScheme="blue"
             size="sm"
-            leftIcon={<span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>}
+            leftIcon={
+              <span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>
+            }
           >
             Ghế đôi
+          </Button>
+        </div>
+        <div className="flex justify-between mt-4 gap-5">
+          <Button
+            bg="transparent"
+            color="blue.500"
+            border="1px solid"
+            borderColor="blue.500"
+            _hover={{ bg: "blue.500", color: "white" }}
+            _active={{ bg: "blue.600", color: "white" }}
+            borderRadius="md"
+            boxShadow="md"
+            px={10} // Tăng độ rộng của nút
+            py={3}
+            onClick={() => alert("Hello world")}
+          >
+            Edit Seat
+          </Button>
+          <Button
+            bg="transparent"
+            color="blue.500"
+            border="1px solid"
+            borderColor="blue.500"
+            _hover={{ bg: "blue.500", color: "white" }}
+            _active={{ bg: "blue.600", color: "white" }}
+            borderRadius="md"
+            boxShadow="md"
+            px={10} // Tăng độ rộng của nút
+            py={3}
+            onClick={() => alert("Hello world")}
+          >
+            Hidden Seat
           </Button>
         </div>
       </div>

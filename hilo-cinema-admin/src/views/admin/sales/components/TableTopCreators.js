@@ -53,7 +53,9 @@ const TopCreatorTable = ({ customers, loading, error }) => {
               <Th>Gender</Th>
             </Tr>
           </Thead>
-          <Tbody color={textColor}>
+          <Tbody color={textColor} fontSize={{ sm: '14px' }}
+                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                          borderColor="transparent">
             {customers.map((customer) => (
               <Tr key={customer.id}>
                 <Td>{customer.name}</Td>
