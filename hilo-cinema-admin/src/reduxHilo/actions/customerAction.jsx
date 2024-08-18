@@ -56,3 +56,40 @@ export const fetchCustomerCount = () => {
   };
 };
 
+//Search
+export const searchCustomersRequest = () => ({
+  type: "SEARCH_CUSTOMERS_REQUEST"
+});
+
+export const searchCustomersSuccess = (customers) => ({
+  type: "SEARCH_CUSTOMERS_SUCCESS",
+  payload: customers
+});
+
+export const searchCustomersFailure = (error) => ({
+  type: "SEARCH_CUSTOMERS_FAILURE",
+  payload: error.message || error.toString()
+});
+
+export const searchCustomers = (searchValue, searchField) => {
+  return (dispatch) => {
+    dispatch(searchCustomersRequest());
+    return axios.get(`https://localhost:5005/api/Customer/Search`, {
+      params: {
+        searchValue: searchValue,
+        searchField: searchField
+      }
+    })
+      .then(response => {
+        dispatch(searchCustomersSuccess(response.data));
+      })
+      .catch(error => {
+        console.error("There was an error!", error);
+        dispatch(searchCustomersFailure(error));
+      });
+  };
+};
+export const clearSearchResults = () => ({
+  type: "CLEAR_SEARCH_RESULTS",
+});
+

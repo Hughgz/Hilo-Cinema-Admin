@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Flex,
+  Input,
   Spinner,
   Table,
   Tbody,
@@ -11,39 +12,57 @@ import {
   Th,
   Thead,
   Tr,
+  Select,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useDispatch } from 'react-redux';
-import { fetchTotalInvoiceByCustomerId } from 'reduxHilo/actions/invoiceAction';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomers, searchCustomers, clearSearchResults } from 'reduxHilo/actions/customerAction'; // Import clearSearchResults
+import ModalAlert from 'components/alert/modalAlert';
 
 const TopCustomerTable = ({ customers, loading, error }) => {
-  const [sortedCustomers, setSortedCustomers] = useState([]);
-  const [totals, setTotals] = useState({});
   const dispatch = useDispatch();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
 
-  useEffect(() => {
-    const fetchTotals = async () => {
-      const totalsData = {};
-      for (let customer of customers) {
-        const total = await dispatch(fetchTotalInvoiceByCustomerId(customer.id));
-        totalsData[customer.id] = total;
-      }
-      setTotals(totalsData);
+  const [searchValue, setSearchValue] = useState('');
+  const [searchField, setSearchField] = useState('name'); // Trường tìm kiếm mặc định là name
+  const [validationError, setValidationError] = useState(''); // State để lưu lỗi
+  const [isAlertVisible, setIsAlertVisible] = useState(false); // State để kiểm soát hiển thị ModalAlert
 
-      // Sau khi đã có totals, sắp xếp khách hàng dựa trên tổng số tiền
-      const sorted = [...customers].sort((a, b) => {
-        const totalA = totalsData[a.id] || 0;
-        const totalB = totalsData[b.id] || 0;
-        return totalB - totalA; // Sắp xếp giảm dần
-      });
-      setSortedCustomers(sorted);
-    };
+  const searchResults = useSelector((state) => state.customer.searchResults);
 
-    if (customers.length > 0) {
-      fetchTotals();
+  const handleSearch = () => {
+    // Validate input trước khi thực hiện tìm kiếm
+    if (!searchValue.trim()) {
+      setValidationError('Search value cannot be empty.');
+      setIsAlertVisible(true); // Hiển thị ModalAlert khi có lỗi
+      return;
     }
-  }, [customers, dispatch]);
+
+    if (!['name', 'email', 'phone'].includes(searchField)) {
+      setValidationError('Invalid search field.');
+      setIsAlertVisible(true); // Hiển thị ModalAlert khi có lỗi
+      return;
+    }
+
+    // Xóa lỗi và thực hiện tìm kiếm nếu không có lỗi
+    setValidationError('');
+    dispatch(searchCustomers(searchValue, searchField));
+  };
+
+  const closeAlert = () => {
+    setIsAlertVisible(false); // Đóng ModalAlert khi nhấn nút "Close"
+  };
+
+  const handleReset = () => {
+    // Reset lại state của searchValue và searchResults
+    setSearchValue('');
+    dispatch(clearSearchResults()); // Clear search results
+    dispatch(fetchCustomers()); // Gọi action để lấy lại danh sách khách hàng gốc
+  };
+
+  useEffect(() => {
+    dispatch(fetchCustomers());
+  }, [dispatch]);
 
   if (loading) {
     return <Spinner />;
@@ -54,25 +73,34 @@ const TopCustomerTable = ({ customers, loading, error }) => {
   }
 
   return (
-    <Flex
-      direction="column"
-      w="100%"
-      overflowX={{ sm: 'scroll', lg: 'hidden' }}
-    >
-      <Flex
-        align={{ sm: 'flex-start', lg: 'center' }}
-        justify="space-between"
-        w="100%"
-        px="22px"
-        pb="20px"
-        mb="10px"
-        boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
-      >
-        <Text color={textColor} fontSize="xl" fontWeight="600">
-          Top Customers
+    <Flex direction="column" w="100%" overflowX={{ sm: 'scroll', lg: 'hidden' }}>
+      <Flex align={{ sm: 'flex-start', lg: 'center' }} justify="space-between" w="100%" px="22px" pb="20px" mb="10px" boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)">
+        <Text color={textColor} fontSize="xl" fontWeight="600" cursor="pointer" onClick={handleReset}>
+          Customers
         </Text>
         <Button variant="action">See all</Button>
       </Flex>
+
+      {/* Search Input and Select Field */}
+      <Flex mb={4} px="22px" align="center">
+        <Input
+          placeholder="Search..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          mr={2}
+        />
+        <Select
+          value={searchField}
+          onChange={(e) => setSearchField(e.target.value)}
+          mr={2}
+        >
+          <option value="name">Name</option>
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+        </Select>
+        <Button onClick={handleSearch}>Search</Button>
+      </Flex>
+
       <Box>
         <Table variant="simple" color="gray.500" mt="12px">
           <Thead color={textColor}>
@@ -83,16 +111,24 @@ const TopCustomerTable = ({ customers, loading, error }) => {
             </Tr>
           </Thead>
           <Tbody color={textColor}>
-            {sortedCustomers.map((customer) => (
+            {(searchResults.length > 0 ? searchResults : customers).map((customer) => (
               <Tr key={customer.id}>
                 <Td>{customer.name}</Td>
                 <Td>{customer.gender}</Td>
-                <Td>{totals[customer.id] || 0}</Td> {/* Hiển thị tổng số tiền */}
+                <Td>{customer.total || 0}</Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       </Box>
+
+      {/* ModalAlert để hiển thị lỗi */}
+      <ModalAlert
+        message={validationError}
+        type="error"
+        isVisible={isAlertVisible}
+        onClose={closeAlert}
+      />
     </Flex>
   );
 };

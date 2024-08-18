@@ -10,6 +10,7 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
     const selectedSeats = useSelector((state) => state.booking.selectedSeats);
     const [vipSeats, setVipSeats] = useState([]); // State để lưu các ghế VIP
     const [doubleSeats, setDoubleSeats] = useState([]); // State để lưu các ghế đôi
+    const [inactiveSeats, setInactiveSeats] = useState([]); // State để lưu các ghế inactive
     const [alertMessage, setAlertMessage] = useState("");
     const [alertType, setAlertType] = useState("");
     const [isAlertVisible, setIsAlertVisible] = useState(false);
@@ -42,8 +43,12 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
                 const seatType = doubleSeats.includes(seatName)
                     ? "double"
                     : vipSeats.includes(seatName)
-                    ? "vip"
-                    : "standard"; // Nếu ghế trong danh sách Double thì lưu với loại "double", nếu là VIP thì "vip", còn lại là "standard"
+                        ? "vip"
+                        : "standard"; // Nếu ghế trong danh sách Double thì lưu với loại "double", nếu là VIP thì "vip", còn lại là "standard"
+
+                const seatStatus = inactiveSeats.includes(seatName)
+                    ? "inactive"
+                    : "active"; // Nếu ghế trong danh sách inactive thì lưu với trạng thái inactive
 
                 // Tạo dữ liệu ghế
                 const seatData = {
@@ -52,7 +57,7 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
                     rowSeat: rowIndex + 1,
                     name: seatName,
                     type: seatType,  // Gán loại ghế
-                    status: "available"
+                    status: seatStatus,  // Gán trạng thái ghế
                 };
 
                 seatsData.push(seatData);
@@ -91,6 +96,12 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
         }
     };
 
+    // Hàm xử lý khi nhấn vào nút "Seat Hidden"
+    const handleHiddenSelect = () => {
+        const newInactiveSeats = selectedSeats.filter(seat => !inactiveSeats.includes(seat)); // Chỉ chọn ghế inactive nếu chưa có trong danh sách
+        setInactiveSeats([...inactiveSeats, ...newInactiveSeats]); // Cập nhật danh sách ghế inactive
+    };
+
     // Hàm đóng ModalAlert
     const closeAlert = () => {
         setIsAlertVisible(false);
@@ -119,24 +130,26 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
                                             const seatName = `${rowLabel}${colIndex + 1}`; // Tạo tên ghế (A1, A2,...)
                                             const isDisavailable = false; // Giả định rằng không có ghế nào không khả dụng
                                             const isInvisible = false; // Giả định rằng không có ghế nào vô hình
+                                            const isInactive = inactiveSeats.includes(seatName); // Kiểm tra nếu ghế có trong danh sách inactive
 
                                             return (
                                                 <button
                                                     key={colIndex}
-                                                    className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${
-                                                        isInvisible
+                                                    className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${isInvisible
                                                             ? "invisible"
                                                             : isDisavailable
-                                                            ? "bg-gray-300 border-gray-300"
-                                                            : doubleSeats.includes(seatName)
-                                                            ? "text-white bg-blue-500 border-blue-500" // Màu xanh dương cho ghế đôi
-                                                            : vipSeats.includes(seatName)
-                                                            ? "text-white bg-red-500 border-red-500" // Màu đỏ cho ghế VIP
-                                                            : isSelected(seatName)
-                                                            ? "text-white bg-green-500 border-green-500" // Màu xanh lá cây cho ghế chọn
-                                                            : "border-gray-400 hover:bg-green-100 hover:border-green-500"
-                                                    } md:w-8 w-6 shadow-sm`}
-                                                    disabled={isDisavailable}
+                                                                ? "bg-gray-300 border-gray-300"
+                                                                : isInactive
+                                                                    ? "bg-gray-500 border-gray-500" // Màu xám cho ghế inactive
+                                                                    : doubleSeats.includes(seatName)
+                                                                        ? "text-white bg-blue-500 border-blue-500" // Màu xanh dương cho ghế đôi
+                                                                        : vipSeats.includes(seatName)
+                                                                            ? "text-white bg-red-500 border-red-500" // Màu đỏ cho ghế VIP
+                                                                            : isSelected(seatName)
+                                                                                ? "text-white bg-green-500 border-green-500" // Màu xanh lá cây cho ghế chọn
+                                                                                : "border-gray-400 hover:bg-green-100 hover:border-green-500"
+                                                        } md:w-8 w-6 shadow-sm`}
+                                                    disabled={isDisavailable || isInactive} // Ghế inactive sẽ bị disabled
                                                     onClick={() => handleSeatClick(seatName)}
                                                 >
                                                     {!isInvisible && (
@@ -162,12 +175,23 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
                 <div className="flex justify-end gap-5">
                     <Button
                         variant="outline"
+                        colorScheme="gray"
+                        size="sm"
+                        onClick={handleHiddenSelect} // Chọn ghế Hidden
+                        leftIcon={
+                            <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
+                        }
+                    >
+                        Seat Hide
+                    </Button>
+                    <Button
+                        variant="outline"
                         colorScheme="red"
                         size="sm"
                         onClick={handleVipSelect} // Chọn ghế VIP
                         leftIcon={<span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>}
                     >
-                        Ghế VIP
+                        Seat VIP
                     </Button>
                     <Button
                         variant="outline"
@@ -176,7 +200,7 @@ export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {
                         onClick={handleDoubleSelect} // Chọn ghế đôi
                         leftIcon={<span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>}
                     >
-                        Ghế đôi
+                        Seat couple
                     </Button>
                 </div>
             </div>

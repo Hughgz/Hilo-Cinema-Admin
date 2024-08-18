@@ -214,44 +214,36 @@ export default function Banner({ roomId, rowNum, colNum }) {
                         );
                       }
 
-                      const isHidden = seat?.status === "hidden";
-                      const isBooked = seat?.status === "booked";
+                      // Kiểm tra trạng thái ghế
+                      const isInactive = seat?.status === "inactive";
+                      const isSeatSelected = isSelected(seat);
 
                       let seatClass =
                         "border-gray-400 hover:bg-green-100 hover:border-green-500";
-                      if (seat.type === "vip") {
-                        seatClass = "text-white bg-red-500 border-red-500";
+                      if (isInactive && !isSeatSelected) {
+                        seatClass = "bg-gray-300 border-gray-300"; // Ghế inactive sẽ có màu xám nhạt hơn
+                      } else if (isSeatSelected) {
+                        seatClass = "bg-green-500 border-green-500"; // Ghế được chọn sẽ có màu xanh
+                      } else if (seat.type === "vip") {
+                        seatClass = "bg-red-500 border-red-500";
                       } else if (seat.type === "double") {
-                        seatClass = "text-white bg-blue-500 border-blue-500";
+                        seatClass = "bg-blue-500 border-blue-500";
                       }
 
                       return (
                         <button
                           key={colIndex}
-                          className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${
-                            isHidden
-                              ? "hidden"
-                              : isBooked
-                              ? "bg-gray-300 border-gray-300"
-                              : isSelected(seat)
-                              ? "text-white bg-green-500 border-green-500"
-                              : seatClass
-                          } md:w-8 w-6 shadow-sm`}
-                          disabled={isBooked}
+                          className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${seatClass} md:w-8 w-6 shadow-sm`}
                           onClick={() => handleSeatClick(seat)}
                         >
-                          {!isHidden && (
-                            <span
-                              className={`inline-block md:w-8 w-6 text-center`}
-                              style={{
-                                color: isSelected(seat)
-                                  ? "white"
-                                  : seatTextColor,
-                              }}
-                            >
-                              {seat.name || `${rowLabel}${colIndex + 1}`}
-                            </span>
-                          )}
+                          <span
+                            className={`inline-block md:w-8 w-6 text-center`}
+                            style={{
+                              color: textColor, // Áp dụng textColor cho tên ghế
+                            }}
+                          >
+                            {seat.name || `${rowLabel}${colIndex + 1}`}
+                          </span>
                         </button>
                       );
                     })}
@@ -268,15 +260,15 @@ export default function Banner({ roomId, rowNum, colNum }) {
           </ul>
         </div>
         <div className="flex justify-end gap-5">
-        <Button
+          <Button
             variant="outline"
-            colorScheme="bg-gray-300"
+            colorScheme="gray"
             size="sm"
             leftIcon={
-              <span className="w-5 h-5 bg-gray-300 inline-block rounded-full"></span>
+              <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
             }
           >
-            Seat Booked
+            Seat Hide
           </Button>
           <Button
             variant="outline"
@@ -311,7 +303,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
             boxShadow="md"
             px={10} // Tăng độ rộng của nút
             py={3}
-            w={'full'}
+            w={"full"}
             onClick={handleEditSeat} // Trigger EditSeatForm modal
           >
             Edit Seat

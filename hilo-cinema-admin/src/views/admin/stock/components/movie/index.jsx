@@ -16,7 +16,7 @@ export default function UserManagement() {
         mb='20px'
         columns={{ sm: 1, md: 1 }}
         spacing={{ base: "20px", xl: "20px" }}>
-        <TrendingMovie></TrendingMovie>
+        {/* <TrendingMovie></TrendingMovie> */}
         <DevelopmentTable
           columnsData={columnsDataDevelopment}
           tableData={tableDataDevelopment}

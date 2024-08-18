@@ -97,9 +97,8 @@ export default function EditSeatForm({ seatId, onClose }) {
                     value={formData.status}
                     onChange={handleChange}
                 >
-                    <option value="available">Available</option>
-                    <option value="booked">Booked</option>
-                    <option value="hidden">Hidden</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                 </Select>
 
                 <ModalFooter>
