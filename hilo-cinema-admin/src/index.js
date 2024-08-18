@@ -11,9 +11,9 @@ import { ThemeEditorProvider } from "@hypertheme-editor/chakra-ui";
 import { Provider } from "react-redux";
 import { applyMiddleware, legacy_createStore as createStore } from "redux";
 import { thunk } from "redux-thunk";
-import EditEmployeeForm from "views/admin/users/components/employees/components/EditEmployee";
-import AddEmployeeForm from "views/admin/users/components/employees/components/AddEmployee";
-import EditMovieForm from "views/admin/stock/components/movie/components/EditMovie";
+import ForgotPassword from "views/auth/signIn/forgotPassword";
+import VerifyOTP from "views/auth/signIn/verifyOTP";
+import NewPassword from "views/auth/signIn/newPassword";
 
 const store = createStore(allReducers, applyMiddleware(thunk));
 
@@ -26,10 +26,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <HashRouter>
           <Switch>
             <Route path={`/auth`} component={AuthLayout} />
+            <Route path={`/forgot-password`} component={ForgotPassword} />
+            <Route path={`/verify-otp`} component={VerifyOTP} />
+            <Route path={`/new-password`} component={NewPassword} />
             <Route path={`/admin`} component={AdminLayout} />
-            <Route path={`/edit-employee/:id`} component={EditEmployeeForm} />
-            <Route path={`/employee/add`} component={AddEmployeeForm} />
-            <Route path={`/edit-movie/:id`} component={EditMovieForm} />
             <Redirect from="/" to="/admin" />
           </Switch>
         </HashRouter>

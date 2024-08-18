@@ -5,7 +5,8 @@ import {
   EDIT_EMPLOYEE_FAILURE, ADD_EMPLOYEE_SUCCESS, 
   ADD_EMPLOYEE_FAILURE,
   UPDATE_EMPLOYEE_STATUS_SUCCESS, 
-  UPDATE_EMPLOYEE_STATUS_FAILURE
+  UPDATE_EMPLOYEE_STATUS_FAILURE,
+  FETCH_MOVIES_COUNT_SUCCESS, FETCH_MOVIES_COUNT_FAILURE 
 } from "../types/type";
 
 
@@ -110,5 +111,33 @@ export const updateEmployeeStatus = (id) => {
     .catch(error => {
       dispatch(updateEmployeeStatusFailure(error));
     });
+  };
+};
+//Count
+export const fetchEmployeesCountSuccess = (count) => ({
+  type: FETCH_MOVIES_COUNT_SUCCESS,
+  payload: count,
+});
+
+export const fetchEmployeesCountFailure = (error) => ({
+  type: FETCH_MOVIES_COUNT_FAILURE,
+  payload: error.message || error.toString(),
+});
+
+export const fetchEmployeesCount = () => {
+  return async (dispatch, getState) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;  // Giả sử token được lưu trữ trong state.auth.token
+
+      const response = await axios.get('https://localhost:8000/api/Employees/Count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
+        },
+      });
+      dispatch(fetchEmployeesCountSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchEmployeesCountFailure(error));
+    }
   };
 };

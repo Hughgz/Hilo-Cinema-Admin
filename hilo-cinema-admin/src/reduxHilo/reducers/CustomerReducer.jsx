@@ -1,6 +1,7 @@
 const initialState = {
     loading: false,
     customers: [],
+    count: 0,
     error: null
   };
   
@@ -23,6 +24,16 @@ const initialState = {
           loading: false,
           error: action.payload
         };
+        case "FETCH_CUSTOMERS_COUNT_SUCCESS":
+          return {
+              ...state,
+              count: action.payload,  // Cập nhật count khi fetch thành công
+          };
+      case "FETCH_CUSTOMERS_COUNT_FAILURE":
+          return {
+              ...state,
+              error: action.payload,
+          };
       default:
         return state;
     }

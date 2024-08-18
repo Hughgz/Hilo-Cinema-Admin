@@ -20,11 +20,10 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { fetchMovies } from "reduxHilo/actions/movieAction";
+import { fetchMovies, hiddenMovie } from "reduxHilo/actions/movieAction";
 import Card from "components/card/Card";
 import Menu from "components/menu/MovieMenu";
 import EditMovieForm from "./EditMovieModal";
-import { hiddenMovie } from "reduxHilo/actions/movieAction";
 
 export default function DevelopmentTable(props) {
   const { columnsData } = props;
@@ -53,7 +52,7 @@ export default function DevelopmentTable(props) {
 
   const data = useMemo(() => {
     return movies
-      .filter(movie => movie.status !== "inactive")
+      .filter((movie) => movie.status !== "inactive")
       .filter((movie) =>
         filterInput
           ? movie.country &&
@@ -63,7 +62,6 @@ export default function DevelopmentTable(props) {
   }, [movies, filterInput]);
 
   const handleEdit = (row) => {
-    console.log(row.original.id)
     setSelectedMovie(row.original);
     onOpen();
   };
@@ -80,10 +78,16 @@ export default function DevelopmentTable(props) {
         accessor: "actions",
         Cell: ({ row }) => (
           <div>
-            <Button onClick={() => handleEdit(row)} mr="10px">
+            <Button
+              className="mr-2 text-blue-500 hover:text-blue-700"
+              onClick={() => handleEdit(row)}
+            >
               Edit
             </Button>
-            <Button onClick={() => handleHidden(row)} colorScheme="red">
+            <Button
+              className="text-red-500 hover:text-red-700"
+              onClick={() => handleHidden(row)}
+            >
               Hidden
             </Button>
           </div>
@@ -97,6 +101,7 @@ export default function DevelopmentTable(props) {
     {
       columns: columnsWithActions,
       data,
+      initialState: { pageIndex: 0, pageSize: 5 }, // Thiết lập trang đầu tiên và kích thước trang
     },
     useGlobalFilter,
     useSortBy,
@@ -109,18 +114,29 @@ export default function DevelopmentTable(props) {
     headerGroups,
     page,
     prepareRow,
-    initialState,
+    pageOptions,
+    gotoPage,
+    state: { pageIndex },
   } = tableInstance;
-  initialState.pageSize = 5;
 
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-  
+
   return (
     <>
-      <Card direction="column" w="100%" px="0px" overflowX={{ sm: "scroll", lg: "hidden" }}>
+      <Card
+        direction="column"
+        w="100%"
+        px="0px"
+        overflowX={{ sm: "scroll", lg: "hidden" }}
+      >
         <Flex px="25px" justify="space-between" mb="20px" align="center">
-          <Text color={textColor} fontSize="22px" fontWeight="700" lineHeight="100%">
+          <Text
+            color={textColor}
+            fontSize="22px"
+            fontWeight="700"
+            lineHeight="100%"
+          >
             Movies
           </Text>
           <Menu></Menu>
@@ -142,53 +158,73 @@ export default function DevelopmentTable(props) {
         {loading ? (
           <Text>Loading...</Text>
         ) : error ? (
-          <Text color="red.500">{error}</Text>
+          <Text className="text-red-500">{error}</Text>
         ) : (
-          <Table {...getTableProps()} variant="simple" color="gray.500" mb="24px">
-            <Thead>
-              {headerGroups.map((headerGroup, index) => (
-                <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
-                  {headerGroup.headers.map((column, index) => (
-                    <Th
-                      {...column.getHeaderProps(column.getSortByToggleProps())}
-                      pe="10px"
-                      key={index}
-                      borderColor={borderColor}
-                    >
-                      <Flex
-                        justify="space-between"
-                        align="center"
-                        fontSize={{ sm: "10px", lg: "12px" }}
-                        color="gray.400"
-                      >
-                        {column.render("Header")}
-                      </Flex>
-                    </Th>
-                  ))}
-                </Tr>
-              ))}
-            </Thead>
-            <Tbody {...getTableBodyProps()} color={textColor}>
-              {page.map((row, index) => {
-                prepareRow(row);
-                return (
-                  <Tr {...row.getRowProps()} key={index}>
-                    {row.cells.map((cell, index) => (
-                      <Td
-                        {...cell.getCellProps()}
+          <>
+            <Table
+              {...getTableProps()}
+              className="table-auto w-full"
+              variant="simple"
+              mb="24px"
+            >
+              <Thead>
+                {headerGroups.map((headerGroup, index) => (
+                  <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
+                    {headerGroup.headers.map((column, index) => (
+                      <Th
+                        {...column.getHeaderProps(
+                          column.getSortByToggleProps()
+                        )}
+                        className="text-left px-4 py-2 border-b border-gray-200"
                         key={index}
-                        fontSize={{ sm: "14px" }}
-                        minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                        borderColor="transparent"
                       >
-                        {cell.render("Cell")}
-                      </Td>
+                        <div className="flex justify-between items-center">
+                          {column.render("Header")}
+                        </div>
+                      </Th>
                     ))}
                   </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+                ))}
+              </Thead>
+              <Tbody {...getTableBodyProps()} color={textColor}>
+                {page.map((row, index) => {
+                  prepareRow(row);
+                  return (
+                    <Tr {...row.getRowProps()} key={index}>
+                      {row.cells.map((cell, index) => (
+                        <Td
+                          {...cell.getCellProps()}
+                          className="px-4 py-2 border-b border-gray-200"
+                          key={index}
+                        >
+                          {cell.render("Cell")}
+                        </Td>
+                      ))}
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+
+            {/* Điều khiển phân trang */}
+            <Flex justifyContent="center" alignItems="center" mt="4">
+              <div className="flex space-x-2">
+                {pageOptions.map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    onClick={() => gotoPage(pageNumber)}
+                    className={`px-3 py-1 border rounded ${
+                      pageIndex === pageNumber
+                        ? "bg-blue-500 text-white"
+                        : "bg-white text-blue-500"
+                    }`}
+                  >
+                    {pageNumber + 1}
+                  </button>
+                ))}
+              </div>
+            </Flex>
+          </>
         )}
       </Card>
 

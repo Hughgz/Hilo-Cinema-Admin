@@ -25,13 +25,13 @@ import UserManagement from "views/admin/users";
 import Movies from "views/admin/stock/components/movie";
 import Theaters from "views/admin/stock/components/theater";
 import Stock from "views/admin/stock/components";
-import Customers from "views/admin/users/components/customers";
 import Employees from "views/admin/users/components/employees";
 import Users from "views/admin/users";
 import Actors from "views/admin/stock/components/actor";
 import Producers from "views/admin/stock/components/producer";
 import Categories from "views/admin/stock/components/category";
 import Overview from "views/admin/profile";
+import Customers from "views/admin/users/components/customers/components/CustomerList";
 
 
 const routes = [

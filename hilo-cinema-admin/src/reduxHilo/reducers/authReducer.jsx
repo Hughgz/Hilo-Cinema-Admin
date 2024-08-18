@@ -1,9 +1,10 @@
-import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from '../types/type';
+import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT, FETCH_EMPLOYEES_COUNT_SUCCESS, FETCH_EMPLOYEES_COUNT_FAILURE } from '../types/type';
 
 const initialState = {
   loading: false,
   user: JSON.parse(localStorage.getItem('user')) || null, // Lưu toàn bộ thông tin employee vào user
   token: localStorage.getItem('token') || null,
+  count: 0,
   error: null,
 };
 
@@ -23,6 +24,16 @@ const authReducer = (state = initialState, action) => {
       return { ...state, loading: false, error: action.payload };
     case LOGOUT:
       return { ...state, user: null, token: null, error: null };
+    case FETCH_EMPLOYEES_COUNT_SUCCESS:
+      return {
+        ...state,
+        count: action.payload,  // Cập nhật count khi fetch thành công
+      };
+    case FETCH_EMPLOYEES_COUNT_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      };
     default:
       return state;
   }

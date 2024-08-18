@@ -27,3 +27,32 @@ export const fetchCustomers = () => {
       });
   };
 };
+//Total Customer
+export const fetchCustomersCountSuccess = (count) => ({
+  type: "FETCH_CUSTOMERS_COUNT_SUCCESS",
+  payload: count,
+});
+
+export const fetchCustomersCountFailure = (error) => ({
+  type: "FETCH_CUSTOMERS_COUNT_FAILURE",
+  payload: error.message || error.toString(),
+});
+
+export const fetchCustomerCount = () => {
+  return async (dispatch, getState) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+
+      const response = await axios.get('https://localhost:5005/api/Customer/Count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
+        },
+      });
+      dispatch(fetchCustomersCountSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchCustomersCountFailure(error));
+    }
+  };
+};
+

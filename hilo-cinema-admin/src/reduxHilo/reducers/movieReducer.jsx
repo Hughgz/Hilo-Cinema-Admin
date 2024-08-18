@@ -3,12 +3,15 @@ import {
     FETCH_MOVIES_FAILURE,
     EDIT_MOVIES_SUCCESS, EDIT_MOVIES_FAILURE,
     ADD_MOVIES_SUCCESS, ADD_MOVIES_FAILURE,
-    HIDDEN_MOVIE_SUCCESS, HIDDEN_MOVIE_FAILURE
+    HIDDEN_MOVIE_SUCCESS, HIDDEN_MOVIE_FAILURE,
+    FETCH_MOVIES_COUNT_SUCCESS,
+    FETCH_MOVIES_COUNT_FAILURE,
 } from "../types/type";
 
 const initialState = {
     loading: false,
     movies: [],
+    count: 0,
     error: null
 };
 
@@ -61,6 +64,16 @@ const movieReducer = (state = initialState, action) => {
                 movies: state.movies.filter(movie => movie.id !== action.payload.id),  // Loại bỏ phim đã ẩn khỏi danh sách
             };
         case HIDDEN_MOVIE_FAILURE:
+            return {
+                ...state,
+                error: action.payload,
+            };
+        case FETCH_MOVIES_COUNT_SUCCESS:
+            return {
+                ...state,
+                count: action.payload,  // Cập nhật count khi fetch thành công
+            };
+        case FETCH_MOVIES_COUNT_FAILURE:
             return {
                 ...state,
                 error: action.payload,

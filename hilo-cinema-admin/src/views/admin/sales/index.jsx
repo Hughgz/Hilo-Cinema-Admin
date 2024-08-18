@@ -4,51 +4,99 @@ import {
   Button,
   Flex,
   Grid,
-  Link,
   Text,
-  useColorModeValue,
-  SimpleGrid,
   Select,
   useDisclosure,
 } from "@chakra-ui/react";
-import HistoryItem from "views/admin/sales/components/HistoryItem";
-import NFT from "components/card/NFT";
-import Card from "components/card/Card.js";
-import dataMovie from "./variables/dataMovie.json";
-import Avatar1 from "assets/img/avatars/avatar1.png";
-import Avatar2 from "assets/img/avatars/avatar2.png";
-import Avatar3 from "assets/img/avatars/avatar3.png";
-import Avatar4 from "assets/img/avatars/avatar4.png";
-import tableDataConcessions from "views/admin/sales/variables/tableDataConcessions.json";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCustomers } from "reduxHilo/actions/customerAction";
-import Banner from "./components/Banner";
 import { fetchRooms } from "reduxHilo/actions/roomAction";
+import { fetchTheaters } from "reduxHilo/actions/theaterAction";
+import { fetchMovies } from "reduxHilo/actions/movieAction";
+import { fetchSchedulesByMovieId } from "reduxHilo/actions/scheduleAction";
+import Banner from "./components/Banner";
 import AddRoomForm from "./components/AddRoomForm";
 import TopCustomerTable from "./components/TableTopCustomers";
+import HistoryItem from "views/admin/sales/components/HistoryItem";
+import Card from "components/card/Card.js";
+import tableDataConcessions from "views/admin/sales/variables/tableDataConcessions.json";
+import { clearSchedules } from "reduxHilo/actions/scheduleAction";
 
 export default function Sales() {
-
-  // Chakra Color Mode
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const textColorBrand = useColorModeValue("brand.500", "white");
-
-  // Redux
   const dispatch = useDispatch();
-  const [movies, setMovies] = useState([]);
-  const { user, token } = useSelector((state) => state.auth); // Sử dụng token từ authReducer
+  const { movies } = useSelector((state) => state.movie);
+  const { user, token } = useSelector((state) => state.auth);
   const { loading, customers, error } = useSelector((state) => state.customer);
-
-  const [selectedRoom, setSelectedRoom] = useState("");
+  const { theaters } = useSelector((state) => state.theater);
   const { rooms } = useSelector((state) => state.room);
+  const { schedules } = useSelector((state) => state.schedule);
+
+  const [selectedTheater, setSelectedTheater] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState("");
 
   useEffect(() => {
-    if (token) { // Chỉ dispatch nếu đã có token
+    if (token) {
       dispatch(fetchRooms());
       dispatch(fetchCustomers());
-      setMovies(dataMovie);
+      dispatch(fetchTheaters());
+      dispatch(fetchMovies());
     }
   }, [dispatch, token]);
+
+  const handleTheaterChange = (e) => {
+    setSelectedTheater(e.target.value);
+    setSelectedMovie(null);
+    setSelectedSchedule(null);
+    setSelectedRoom(null);
+  };
+
+  const handleMovieChange = (e) => {
+    const selectedMovieId = e.target.value;
+    setSelectedMovie(selectedMovieId);
+    setSelectedSchedule(null);
+    setSelectedRoom(null);
+
+    // Clear schedules before fetching new ones
+    dispatch(clearSchedules());  // Sử dụng action clearSchedules
+
+    console.log("Selected movie ID:", selectedMovieId);
+
+    if (selectedMovieId) {
+      dispatch(fetchSchedulesByMovieId(selectedMovieId))
+        .then(response => {
+          if (response && response.data && response.data.length > 0) {
+            // Có lịch chiếu, không cần làm gì thêm
+          } else {
+            // Không có lịch chiếu, trả về null
+            setSelectedSchedule(null);
+          }
+        })
+        .catch(() => {
+          setSelectedSchedule(null);
+        });
+    }
+  };
+
+  const handleScheduleChange = (e) => {
+    const selectedValue = e.target.value;
+    setSelectedSchedule(selectedValue);
+
+    // Tìm roomId tương ứng với lịch chiếu đã chọn
+    const selectedScheduleObj = schedules.find(
+      (schedule) => `${schedule.date}-${schedule.time}` === selectedValue
+    );
+
+    if (selectedScheduleObj && selectedScheduleObj.roomId) {
+      const filteredRooms = rooms.filter(
+        (room) => room.id === selectedScheduleObj.roomId
+      );
+      setSelectedRoom(filteredRooms.length > 0 ? filteredRooms[0] : null); // Cập nhật room đã chọn
+    } else {
+      setSelectedRoom(null); // Nếu không tìm thấy roomId, reset room
+    }
+  };
 
   const handleRoomChange = (e) => {
     const selectedRoomId = parseInt(e.target.value, 10);
@@ -57,11 +105,43 @@ export default function Sales() {
   };
 
   const roomOptions = useMemo(() => {
-    return rooms.map((room) => ({
-      value: room.id,
-      label: `${room.name} - ${room.theaterName || 'Unknown Theater'}`
+    // Chỉ hiển thị room tương ứng với roomId của schedule đã chọn
+    if (selectedSchedule && selectedRoom) {
+      return rooms
+        .filter((room) => room.id === selectedRoom.id)
+        .map((room) => ({
+          value: room.id,
+          label: `${room.name} - ${room.theaterName || "Unknown Theater"}`,
+        }));
+    }
+    return [];
+  }, [rooms, selectedRoom, selectedSchedule]);
+
+  const theaterOptions = useMemo(() => {
+    return theaters.map((theater) => ({
+      value: theater.id,
+      label: theater.name,
     }));
-  }, [rooms]);
+  }, [theaters]);
+
+  const movieOptions = useMemo(() => {
+    return movies.map((movie) => ({
+      value: movie.id,
+      label: movie.title,
+    }));
+  }, [movies]);
+
+  const scheduleOptions = useMemo(() => {
+    if (!selectedMovie || !schedules || schedules.length === 0) {
+      return [];
+    }
+    return schedules.map((schedule) => ({
+      value: `${schedule.date}-${schedule.time}`,
+      label: `${schedule.date} - ${schedule.time}`,
+      roomId: schedule.roomId,  // Thêm roomId vào đây
+    }));
+  }, [schedules, selectedMovie]);
+
   const {
     isOpen: isModalOpen,
     onOpen: onModalOpen,
@@ -82,16 +162,58 @@ export default function Sales() {
         >
           {/* Combo Boxes */}
           <Flex mb={4}>
-            <Select placeholder="Select Schedule" mr={4}>
-
+            <Select
+              placeholder="Select Theater"
+              mr={4}
+              onChange={handleTheaterChange}
+            >
+              {theaterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </Select>
-            <Select placeholder="Select Room" onChange={handleRoomChange} mr={4}>
+
+            <Select
+              placeholder="Select Movie"
+              mr={4}
+              onChange={handleMovieChange}
+              isDisabled={!selectedTheater}
+            >
+              {movieOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Select Schedule"
+              mr={4}
+              onChange={handleScheduleChange}
+              isDisabled={!selectedMovie || schedules.length === 0}
+            >
+              {scheduleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Select Room"
+              value={selectedRoom ? selectedRoom.id : ""}
+              onChange={handleRoomChange}
+              mr={4}
+              isDisabled={!selectedSchedule}
+            >
               {roomOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </Select>
+
             <Button
               bg="transparent"
               color="blue.500"
@@ -103,94 +225,31 @@ export default function Sales() {
               boxShadow="md"
               px={10}
               py={3}
-              onClick={onModalOpen} // Mở modal khi nhấn vào nút Add Room
+              onClick={onModalOpen}
             >
               Add Room
             </Button>
           </Flex>
+
           {selectedRoom && (
             <Banner
               roomId={selectedRoom.id}
               rowNum={selectedRoom.rowNum}
               colNum={selectedRoom.colNum}
-            />// Pass the selected room's data to Banner
+            />
           )}
-          <Flex direction="column" mt={5}>
-            <Flex
-              mt="45px"
-              mb="20px"
-              justifyContent="space-between"
-              direction={{ base: "column", md: "row" }}
-              align={{ base: "start", md: "center" }}
-            >
-              <Text color={textColor} fontSize="2xl" ms="24px" fontWeight="700">
-                Trending Movies
-              </Text>
-              <Flex
-                align="center"
-                me="20px"
-                ms={{ base: "24px", md: "0px" }}
-                mt={{ base: "20px", md: "0px" }}
-              >
-                <Link
-                  color={textColorBrand}
-                  fontWeight="500"
-                  me={{ base: "34px", md: "44px" }}
-                  to="#art"
-                >
-                  Art
-                </Link>
-                <Link
-                  color={textColorBrand}
-                  fontWeight="500"
-                  me={{ base: "34px", md: "44px" }}
-                  to="#music"
-                >
-                  Music
-                </Link>
-                <Link
-                  color={textColorBrand}
-                  fontWeight="500"
-                  me={{ base: "34px", md: "44px" }}
-                  to="#collectibles"
-                >
-                  Collectibles
-                </Link>
-                <Link color={textColorBrand} fontWeight="500" to="#sports">
-                  Sports
-                </Link>
-              </Flex>
-            </Flex>
-            <SimpleGrid columns={{ base: 1, md: 3 }} gap="20px">
-              {movies.map((movie, index) => (
-                <NFT
-                  key={index}
-                  name={movie.title}
-                  author={`By ${movie.director}`}
-                  bidders={[
-                    Avatar1,
-                    Avatar2,
-                    Avatar3,
-                    Avatar4,
-                    Avatar1,
-                    Avatar1,
-                    Avatar1,
-                    Avatar1,
-                  ]}
-                  image={movie.imgSmall}
-                  rate={`${movie.rate} / 10`}
-                  download={movie.trailer}
-                />
-              ))}
-            </SimpleGrid>
-          </Flex>
         </Flex>
+
         <Flex
           flexDirection="column"
           gridArea={{ xl: "1 / 3 / 2 / 4", "2xl": "1 / 2 / 2 / 3" }}
         >
           <Card px="0px" mb="20px">
-            <TopCustomerTable customers={customers} loading={loading} error={error} />
+            <TopCustomerTable
+              customers={customers}
+              loading={loading}
+              error={error}
+            />
           </Card>
           <Card p="0px">
             <Flex
@@ -207,7 +266,12 @@ export default function Sales() {
             </Flex>
 
             {tableDataConcessions.map((item, index) => (
-              <HistoryItem key={index} name={item.name} image={item.image} cost={item.cost} />
+              <HistoryItem
+                key={index}
+                name={item.name}
+                image={item.image}
+                cost={item.cost}
+              />
             ))}
           </Card>
         </Flex>
@@ -215,7 +279,7 @@ export default function Sales() {
       <AddRoomForm
         isOpen={isModalOpen}
         onClose={onModalClose}
-        fetchRooms={() => dispatch(fetchRooms())} // Implement fetchRooms nếu cần
+        fetchRooms={() => dispatch(fetchRooms())}
       />
     </Box>
   );

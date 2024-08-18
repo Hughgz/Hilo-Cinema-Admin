@@ -4,17 +4,21 @@ import {
   FETCH_MOVIES_FAILURE,
   EDIT_MOVIES_SUCCESS, EDIT_MOVIES_FAILURE,
   ADD_MOVIES_SUCCESS, ADD_MOVIES_FAILURE,
-  HIDDEN_MOVIE_SUCCESS, HIDDEN_MOVIE_FAILURE
+  HIDDEN_MOVIE_SUCCESS, HIDDEN_MOVIE_FAILURE,
+  FETCH_MOVIES_COUNT_SUCCESS, FETCH_MOVIES_COUNT_FAILURE
 } from "../types/type";
 
 export const fetchMoviesRequest = () => ({
   type: FETCH_MOVIES_REQUEST
 });
 
-export const fetchMoviesSuccess = (movies) => ({
-  type: FETCH_MOVIES_SUCCESS,
-  payload: movies
-});
+export const fetchMoviesSuccess = (movie) => {
+  console.log("Fetched movie:", movie);  // Thêm dòng này để kiểm tra dữ liệu
+  return {
+    type: FETCH_MOVIES_SUCCESS,
+    payload: movie
+  };
+};
 
 export const fetchMoviesFailure = (error) => ({
   type: FETCH_MOVIES_FAILURE,
@@ -182,5 +186,33 @@ export const hiddenMovie = (id) => {
           dispatch(hiddenMovieFailure(error));
         }
       });
+  };
+};
+//Total Phim
+export const fetchMoviesCountSuccess = (count) => ({
+  type: FETCH_MOVIES_COUNT_SUCCESS,
+  payload: count,
+});
+
+export const fetchMoviesCountFailure = (error) => ({
+  type: FETCH_MOVIES_COUNT_FAILURE,
+  payload: error.message || error.toString(),
+});
+
+export const fetchMoviesCount = () => {
+  return async (dispatch, getState) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+
+      const response = await axios.get('https://localhost:5001/api/Movies/Count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
+        },
+      });
+      dispatch(fetchMoviesCountSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchMoviesCountFailure(error));
+    }
   };
 };

@@ -6,6 +6,7 @@ import {
 } from "views/admin/stock/components/movie/variables/columnsData";
 import tableDataDevelopment from "views/admin/stock/components/movie/variables/tableDataDevelopment.json";
 import React from "react";
+import TrendingMovie from "./components/TrendingMovie";
 
 export default function UserManagement() {
   // Chakra Color Mode
@@ -15,6 +16,7 @@ export default function UserManagement() {
         mb='20px'
         columns={{ sm: 1, md: 1 }}
         spacing={{ base: "20px", xl: "20px" }}>
+        <TrendingMovie></TrendingMovie>
         <DevelopmentTable
           columnsData={columnsDataDevelopment}
           tableData={tableDataDevelopment}

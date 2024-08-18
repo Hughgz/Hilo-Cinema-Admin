@@ -26,6 +26,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
 import { login } from "reduxHilo/actions/authAction";
 
+
 function SignIn() {
   // Chakra color mode
   const textColor = useColorModeValue("navy.700", "white");
@@ -55,7 +56,6 @@ function SignIn() {
       history.push('/user-dashboard'); // Điều hướng đến trang dành cho người dùng
     }
   }
-
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       <Flex
@@ -163,7 +163,7 @@ function SignIn() {
                     Keep me logged in
                   </FormLabel>
                 </FormControl>
-                <NavLink to='/auth/forgot-password'>
+                <NavLink to='/forgot-password'>
                   <Text
                     color={textColorBrand}
                     fontSize='sm'
@@ -186,7 +186,7 @@ function SignIn() {
               </Button>
             </FormControl>
           </form>
-          <Flex
+          {/* <Flex
             flexDirection='column'
             justifyContent='center'
             alignItems='start'
@@ -204,7 +204,7 @@ function SignIn() {
                 </Text>
               </NavLink>
             </Text>
-          </Flex>
+          </Flex> */}
         </Flex>
       </Flex>
     </DefaultAuth>

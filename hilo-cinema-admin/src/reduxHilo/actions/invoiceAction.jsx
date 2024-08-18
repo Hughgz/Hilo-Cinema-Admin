@@ -3,7 +3,9 @@ import {
     FETCH_INVOICES_REQUEST, FETCH_INVOICES_SUCCESS, 
     FETCH_INVOICES_FAILURE,
     EDIT_INVOICES_SUCCESS,EDIT_INVOICES_FAILURE,
-    ADD_INVOICES_SUCCESS, ADD_INVOICES_FAILURE
+    ADD_INVOICES_SUCCESS, ADD_INVOICES_FAILURE,
+    FETCH_INVOICES_COUNT_SUCCESS,
+    FETCH_INVOICES_COUNT_FAILURE
   } from "../types/type";
 export const fetchInvoicesRequest = () => ({
   type: FETCH_INVOICES_REQUEST
@@ -112,3 +114,32 @@ export const fetchInvoiceDetails = (id) => {
 //       });
 //   };
 // };
+
+//Count
+export const fetchInvoicesCountSuccess = (count) => ({
+  type: FETCH_INVOICES_COUNT_SUCCESS,
+  payload: count,
+});
+
+export const fetchInvoicesCountFailure = (error) => ({
+  type: FETCH_INVOICES_COUNT_FAILURE,
+  payload: error.message || error.toString(),
+});
+
+export const fetchInvoicesCount = () => {
+  return async (dispatch, getState) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+
+      const response = await axios.get('https://localhost:5004/api/Schedule/Count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
+        },
+      });
+      dispatch(fetchInvoicesCountSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchInvoicesCountFailure(error));
+    }
+  };
+};
