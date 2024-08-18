@@ -24,6 +24,7 @@ import { fetchMovies } from "reduxHilo/actions/movieAction";
 import Card from "components/card/Card";
 import Menu from "components/menu/MovieMenu";
 import EditMovieForm from "./EditMovieModal";
+import { hiddenMovie } from "reduxHilo/actions/movieAction";
 
 export default function DevelopmentTable(props) {
   const { columnsData } = props;
@@ -51,21 +52,24 @@ export default function DevelopmentTable(props) {
   }, [movies]);
 
   const data = useMemo(() => {
-    return movies.filter((movie) =>
-      filterInput
-        ? movie.country &&
-          movie.country.toLowerCase().includes(filterInput.toLowerCase())
-        : true
-    );
+    return movies
+      .filter(movie => movie.status !== "inactive")
+      .filter((movie) =>
+        filterInput
+          ? movie.country &&
+            movie.country.toLowerCase().includes(filterInput.toLowerCase())
+          : true
+      );
   }, [movies, filterInput]);
 
   const handleEdit = (row) => {
+    console.log(row.original.id)
     setSelectedMovie(row.original);
     onOpen();
   };
 
-  const handleDelete = (row) => {
-    // dispatch(updateEmployeeStatus(row.original.id));
+  const handleHidden = (row) => {
+    dispatch(hiddenMovie(row.original.id));
   };
 
   const columnsWithActions = useMemo(
@@ -79,7 +83,7 @@ export default function DevelopmentTable(props) {
             <Button onClick={() => handleEdit(row)} mr="10px">
               Edit
             </Button>
-            <Button onClick={() => handleDelete(row)} colorScheme="red">
+            <Button onClick={() => handleHidden(row)} colorScheme="red">
               Hidden
             </Button>
           </div>
@@ -111,7 +115,7 @@ export default function DevelopmentTable(props) {
 
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-
+  
   return (
     <>
       <Card direction="column" w="100%" px="0px" overflowX={{ sm: "scroll", lg: "hidden" }}>

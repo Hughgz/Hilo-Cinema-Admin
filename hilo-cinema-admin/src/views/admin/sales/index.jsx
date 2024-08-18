@@ -21,11 +21,11 @@ import Avatar3 from "assets/img/avatars/avatar3.png";
 import Avatar4 from "assets/img/avatars/avatar4.png";
 import tableDataConcessions from "views/admin/sales/variables/tableDataConcessions.json";
 import { useDispatch, useSelector } from "react-redux";
-import TopCreatorTable from "./components/TableTopCreators";
 import { fetchCustomers } from "reduxHilo/actions/customerAction";
 import Banner from "./components/Banner";
 import { fetchRooms } from "reduxHilo/actions/roomAction";
 import AddRoomForm from "./components/AddRoomForm";
+import TopCustomerTable from "./components/TableTopCustomers";
 
 export default function Sales() {
 
@@ -101,7 +101,7 @@ export default function Sales() {
               _active={{ bg: "blue.600", color: "white" }}
               borderRadius="md"
               boxShadow="md"
-              px={6}
+              px={10}
               py={3}
               onClick={onModalOpen} // Mở modal khi nhấn vào nút Add Room
             >
@@ -190,7 +190,7 @@ export default function Sales() {
           gridArea={{ xl: "1 / 3 / 2 / 4", "2xl": "1 / 2 / 2 / 3" }}
         >
           <Card px="0px" mb="20px">
-            <TopCreatorTable customers={customers} loading={loading} error={error} />
+            <TopCustomerTable customers={customers} loading={loading} error={error} />
           </Card>
           <Card p="0px">
             <Flex

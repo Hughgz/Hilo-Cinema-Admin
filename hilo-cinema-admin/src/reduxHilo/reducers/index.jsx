@@ -6,6 +6,7 @@ import bookingReducer from "./bookingReducer";
 import movieReducer from "./movieReducer";
 import roomReducer from "./roomReducer";
 import seatReducer from "./seatReducer";
+import invoiceReducer from "./invoiceReducer";
 
 export const allReducers = combineReducers({
     customer : customerReducer,
@@ -14,5 +15,6 @@ export const allReducers = combineReducers({
     booking: bookingReducer,
     movie : movieReducer,
     room : roomReducer,
-    seat : seatReducer
+    seat : seatReducer,
+    invoice : invoiceReducer
 })

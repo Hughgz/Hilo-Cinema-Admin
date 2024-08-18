@@ -1,7 +1,8 @@
 import {
     FETCH_SEATS_REQUEST, FETCH_SEATS_SUCCESS,
     FETCH_SEATS_FAILURE,
-    ADD_SEATS_SUCCESS, ADD_SEATS_FAILURE
+    ADD_SEATS_SUCCESS, ADD_SEATS_FAILURE,
+    EDIT_SEATS_SUCCESS, EDIT_SEATS_FAILURE
 } from "../types/type";
 
 const initialState = {
@@ -37,6 +38,18 @@ const seatReducer = (state = initialState, action) => {
                 seats: [...state.seats, action.payload],
             };
         case ADD_SEATS_FAILURE:
+            return {
+                ...state,
+                error: action.payload,
+            };
+        case EDIT_SEATS_SUCCESS:
+            return {
+                ...state,
+                seats: state.seats.map(seat =>
+                    seat.id === action.payload.id ? action.payload : seat
+                ),
+            };
+        case EDIT_SEATS_FAILURE:
             return {
                 ...state,
                 error: action.payload,

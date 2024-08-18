@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectSeat,
@@ -18,6 +18,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import AddSeatForm from "./AddSeatForm";
+import EditSeatForm from "./EditSeatForm"; // Import EditSeatForm
 
 export default function Banner({ roomId, rowNum, colNum }) {
   const dispatch = useDispatch();
@@ -29,28 +30,56 @@ export default function Banner({ roomId, rowNum, colNum }) {
     onClose: onSeatModalClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isEditModalOpen,
+    onOpen: onEditModalOpen,
+    onClose: onEditModalClose,
+  } = useDisclosure();
+
+  const [selectedSeatId, setSelectedSeatId] = useState(null); // State to store selected seat ID
+
   useEffect(() => {
     if (roomId) {
       dispatch(fetchSeatsByRoom(roomId));
     }
   }, [dispatch, roomId]);
 
+  useEffect(() => {
+    if (selectedSeatId) {
+      dispatch(fetchSeatsByRoom(roomId)); // Cập nhật danh sách ghế sau khi chọn ghế
+    }
+  }, [selectedSeatId, dispatch, roomId]);
+
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
   const textColor = useColorModeValue("black", "white");
   const seatTextColor = useColorModeValue("black", "white");
 
-  const isSelected = (seat) => {
-    return selectedSeats.some(
-      (selectedSeat) => selectedSeat.name === seat?.name
-    );
+  const handleSeatClick = (seat) => {
+    console.log(`Seat selected: ${seat.id}`);
+    if (isSelected(seat)) {
+      dispatch(deselectSeat(seat.id)); // Bỏ chọn ghế khi đã được chọn
+    } else {
+      dispatch(selectSeat(seat.id)); // Chọn ghế nếu chưa được chọn
+    }
+    setSelectedSeatId(seat.id); // Save selected seat ID
   };
 
-  const handleSeatClick = (seat) => {
-    if (isSelected(seat)) {
-      dispatch(deselectSeat(seat));
+  const handleEditSeat = () => {
+    if (selectedSeatId) {
+      onEditModalOpen(); // Open Edit Modal
     } else {
-      dispatch(selectSeat(seat));
+      alert("Please select a seat to edit.");
     }
+  };
+
+  const handleSave = () => {
+    dispatch(fetchSeatsByRoom(roomId)); // Cập nhật lại danh sách ghế sau khi lưu
+    onEditModalClose(); // Đóng modal sau khi cập nhật
+  };
+
+  // Kiểm tra xem ghế có đang được chọn không
+  const isSelected = (seat) => {
+    return selectedSeats.some((seatId) => seatId === seat.id);
   };
 
   if (loading) {
@@ -92,11 +121,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
                 onClose={onSeatModalClose}
               />
             </ModalBody>
-            <ModalFooter>
-              {/* <button onClick={onSeatModalClose} className="px-4 py-2 rounded bg-blue-500 text-white">
-                Close
-              </button> */}
-            </ModalFooter>
+            <ModalFooter></ModalFooter>
           </ModalContent>
         </Modal>
       </div>
@@ -189,8 +214,8 @@ export default function Banner({ roomId, rowNum, colNum }) {
                         );
                       }
 
-                      const isInvisible = seat?.status === "invisible";
-                      const isDisavailable = seat?.status === "disavailable";
+                      const isHidden = seat?.status === "hidden";
+                      const isBooked = seat?.status === "booked";
 
                       let seatClass =
                         "border-gray-400 hover:bg-green-100 hover:border-green-500";
@@ -204,18 +229,18 @@ export default function Banner({ roomId, rowNum, colNum }) {
                         <button
                           key={colIndex}
                           className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${
-                            isInvisible
-                              ? "invisible"
-                              : isDisavailable
+                            isHidden
+                              ? "hidden"
+                              : isBooked
                               ? "bg-gray-300 border-gray-300"
                               : isSelected(seat)
                               ? "text-white bg-green-500 border-green-500"
                               : seatClass
                           } md:w-8 w-6 shadow-sm`}
-                          disabled={isDisavailable}
+                          disabled={isBooked}
                           onClick={() => handleSeatClick(seat)}
                         >
-                          {!isInvisible && (
+                          {!isHidden && (
                             <span
                               className={`inline-block md:w-8 w-6 text-center`}
                               style={{
@@ -243,6 +268,16 @@ export default function Banner({ roomId, rowNum, colNum }) {
           </ul>
         </div>
         <div className="flex justify-end gap-5">
+        <Button
+            variant="outline"
+            colorScheme="bg-gray-300"
+            size="sm"
+            leftIcon={
+              <span className="w-5 h-5 bg-gray-300 inline-block rounded-full"></span>
+            }
+          >
+            Seat Booked
+          </Button>
           <Button
             variant="outline"
             colorScheme="red"
@@ -251,7 +286,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
               <span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>
             }
           >
-            Ghế VIP
+            Seat VIP
           </Button>
           <Button
             variant="outline"
@@ -261,7 +296,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
               <span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>
             }
           >
-            Ghế đôi
+            Seat Couple
           </Button>
         </div>
         <div className="flex justify-between mt-4 gap-5">
@@ -276,36 +311,22 @@ export default function Banner({ roomId, rowNum, colNum }) {
             boxShadow="md"
             px={10} // Tăng độ rộng của nút
             py={3}
-            onClick={() => alert("Hello world")}
+            w={'full'}
+            onClick={handleEditSeat} // Trigger EditSeatForm modal
           >
             Edit Seat
-          </Button>
-          <Button
-            bg="transparent"
-            color="blue.500"
-            border="1px solid"
-            borderColor="blue.500"
-            _hover={{ bg: "blue.500", color: "white" }}
-            _active={{ bg: "blue.600", color: "white" }}
-            borderRadius="md"
-            boxShadow="md"
-            px={10} // Tăng độ rộng của nút
-            py={3}
-            onClick={() => alert("Hello world")}
-          >
-            Hidden Seat
           </Button>
         </div>
       </div>
 
-      {/* Modal for AddSeatForm */}
-      <Modal isOpen={isSeatModalOpen} onClose={onSeatModalClose} size="xl">
+      {/* Modal for EditSeatForm */}
+      <Modal isOpen={isEditModalOpen} onClose={onEditModalClose} size="xl">
         <ModalOverlay />
-        <ModalContent maxW="90vw">
-          <ModalHeader>Add New Seat</ModalHeader>
+        <ModalContent>
+          <ModalHeader>Edit Seat</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <AddSeatForm roomId={roomId} rowNum={rowNum} colNum={colNum} />
+            <EditSeatForm seatId={selectedSeatId} onClose={handleSave} />
           </ModalBody>
         </ModalContent>
       </Modal>

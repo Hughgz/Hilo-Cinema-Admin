@@ -24,13 +24,14 @@ export const fetchRooms = () => {
   return (dispatch, getState) => {
     const state = getState();
     const token = state.auth.token;
-
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    console.log(sysRole)
     dispatch(fetchRoomsRequest());
 
     return axios.get("http://localhost:5002/api/Rooms", {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Site-Type': 'admin',  // Gửi Site-Type trong header
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
         'Content-Type': 'application/json'
       }
     })
@@ -49,6 +50,7 @@ export const fetchRooms = () => {
       });
   };
 };
+
 // Edit room
 export const editRoomSuccess = (room) => ({
   type: EDIT_ROOMS_SUCCESS,

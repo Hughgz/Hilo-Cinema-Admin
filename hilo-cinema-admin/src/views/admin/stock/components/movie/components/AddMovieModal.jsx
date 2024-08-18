@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { addMovie } from "reduxHilo/actions/movieAction"; // Chỉnh sửa import actions
 import {
     Modal,
     ModalOverlay,
@@ -21,8 +20,9 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { addMovie, fetchMovies } from "reduxHilo/actions/movieAction";
 
-const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
+const CreateMovieModal = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -36,6 +36,9 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
         movieType: "",
         trailer: "",
         status: "",
+        imgSmall: null,
+        imgLarge: null,
+        movieUrl: "",
     });
 
     const [errors, setErrors] = useState({});
@@ -96,13 +99,23 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
         if (!formData.status) {
             validationErrors.status = "Status is required";
         }
+        if (!formData.movieUrl) {
+            validationErrors.movieUrl = "Movie URL is required";
+        }
 
         return validationErrors;
     };
 
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        setErrors({ ...errors, [name]: "" });  // Clear the error for the current field
+    };
+
+    const handleImageChange = (e) => {
+        const { name, files } = e.target;
+        setFormData({ ...formData, [name]: files[0] });
         setErrors({ ...errors, [name]: "" });  // Clear the error for the current field
     };
 
@@ -113,10 +126,20 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
             setErrors(validationErrors);
         } else {
             try {
-                await dispatch(addMovie(formData)); // Sử dụng action addMovie để thêm phim mới
+                const data = new FormData();
+                Object.keys(formData).forEach((key) => {
+                    data.append(key, formData[key]);
+                });
+
+                // Log dữ liệu trước khi gửi
+                for (let [key, value] of data.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+
+                await dispatch(addMovie(data));  // Sử dụng FormData để gửi yêu cầu
                 alert("Thêm phim mới thành công");
                 onClose(); // Đóng modal sau khi thêm thành công
-                fetchMovies(); // Gọi hàm fetchMovies để làm mới danh sách phim
+                dispatch(fetchMovies()); // Làm mới danh sách phim sau khi thêm
             } catch (error) {
                 console.error("Error saving movie:", error.response ? error.response.data : error.message);
             }
@@ -131,7 +154,7 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Thêm Phim Mới</ModalHeader>
+                <ModalHeader>Add New Movie</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <form onSubmit={handleSubmit}>
@@ -151,7 +174,7 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
                                 {errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage>}
                             </FormControl>
                             <FormControl id="duration" isInvalid={errors.duration}>
-                                <FormLabel color={textColor}>Duration (minutes)</FormLabel>
+                                <FormLabel color={textColor}>Duration</FormLabel>
                                 <Input
                                     type="number"
                                     name="duration"
@@ -163,6 +186,20 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
                                     _placeholder={{ color: "gray.500" }}
                                 />
                                 {errors.duration && <FormErrorMessage>{errors.duration}</FormErrorMessage>}
+                            </FormControl>
+                            <FormControl id="movieUrl" isInvalid={errors.movieUrl}>
+                                <FormLabel color={textColor}>Movie URL</FormLabel>
+                                <Input
+                                    type="text"
+                                    name="movieUrl"
+                                    value={formData.movieUrl}
+                                    onChange={handleChange}
+                                    bg={inputBackgroundColor}
+                                    border={0}
+                                    color={textColor}
+                                    _placeholder={{ color: "gray.500" }}
+                                />
+                                {errors.movieUrl && <FormErrorMessage>{errors.movieUrl}</FormErrorMessage>}
                             </FormControl>
                             <FormControl id="releasedDate" isInvalid={errors.releasedDate}>
                                 <FormLabel color={textColor}>Released Date</FormLabel>
@@ -242,16 +279,33 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
                             </FormControl>
                             <FormControl id="movieType" isInvalid={errors.movieType}>
                                 <FormLabel color={textColor}>Movie Type</FormLabel>
-                                <Input
-                                    type="text"
+                                <Select
                                     name="movieType"
                                     value={formData.movieType}
                                     onChange={handleChange}
-                                    bg={inputBackgroundColor}
-                                    border={0}
-                                    color={textColor}
-                                    _placeholder={{ color: "gray.500" }}
-                                />
+                                >
+                                    <option value="action">Action</option>
+                                    <option value="adventure">Adventure</option>
+                                    <option value="comedy">Comedy</option>
+                                    <option value="drama">Drama</option>
+                                    <option value="horror">Horror</option>
+                                    <option value="romance">Romance</option>
+                                    <option value="sci-fi">Science Fiction (Sci-Fi)</option>
+                                    <option value="fantasy">Fantasy</option>
+                                    <option value="thriller">Thriller</option>
+                                    <option value="mystery">Mystery</option>
+                                    <option value="documentary">Documentary</option>
+                                    <option value="animation">Animation</option>
+                                    <option value="musical">Musical</option>
+                                    <option value="crime">Crime</option>
+                                    <option value="biography">Biography (Biopic)</option>
+                                    <option value="historical">Historical</option>
+                                    <option value="war">War</option>
+                                    <option value="western">Western</option>
+                                    <option value="family">Family</option>
+                                    <option value="sport">Sport</option>
+                                    <option value="superhero">Superhero</option>
+                                </Select>
                                 {errors.movieType && <FormErrorMessage>{errors.movieType}</FormErrorMessage>}
                             </FormControl>
                             <FormControl id="trailer" isInvalid={errors.trailer}>
@@ -268,6 +322,37 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
                                 />
                                 {errors.trailer && <FormErrorMessage>{errors.trailer}</FormErrorMessage>}
                             </FormControl>
+
+                            {/* Input cho hình ảnh nhỏ */}
+                            <FormControl id="imgSmall" isInvalid={errors.imgSmall}>
+                                <FormLabel color={textColor}>Small Image</FormLabel>
+                                <Input
+                                    type="file"
+                                    name="imgSmall"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    bg={inputBackgroundColor}
+                                    border={0}
+                                    color={textColor}
+                                />
+                                {errors.imgSmall && <FormErrorMessage>{errors.imgSmall}</FormErrorMessage>}
+                            </FormControl>
+
+                            {/* Input cho hình ảnh lớn */}
+                            <FormControl id="imgLarge" isInvalid={errors.imgLarge}>
+                                <FormLabel color={textColor}>Large Image</FormLabel>
+                                <Input
+                                    type="file"
+                                    name="imgLarge"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    bg={inputBackgroundColor}
+                                    border={0}
+                                    color={textColor}
+                                />
+                                {errors.imgLarge && <FormErrorMessage>{errors.imgLarge}</FormErrorMessage>}
+                            </FormControl>
+
                             <FormControl id="status" isInvalid={errors.status}>
                                 <FormLabel color={textColor}>Status</FormLabel>
                                 <Select
@@ -300,8 +385,6 @@ const CreateMovieModal = ({ isOpen, onClose, fetchMovies }) => {
 CreateMovieModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    fetchMovies: PropTypes.func.isRequired,
 };
 
 export default CreateMovieModal;
-

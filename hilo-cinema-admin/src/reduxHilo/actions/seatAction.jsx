@@ -2,7 +2,7 @@ import axios from "axios";
 import {
     FETCH_SEATS_REQUEST, FETCH_SEATS_SUCCESS,
     FETCH_SEATS_FAILURE,
-    ADD_SEATS_SUCCESS, ADD_SEATS_FAILURE
+    ADD_SEATS_SUCCESS, ADD_SEATS_FAILURE, EDIT_SEATS_SUCCESS, EDIT_SEATS_FAILURE
 } from "../types/type";
 export const fetchSeatsRequest = () => ({
     type: FETCH_SEATS_REQUEST
@@ -53,39 +53,39 @@ export const fetchSeatsByRoom = (roomId) => {
 };
 
 //Edit Seat
-// export const editSeatSuccess = (Seat) => ({
-//   type: EDIT_SeatS_SUCCESS,
-//   payload: Seat,
-// });
+export const editSeatSuccess = (seat) => ({
+  type: EDIT_SEATS_SUCCESS,
+  payload: seat,
+});
 
-// export const editSeatFailure = (error) => ({
-//   type: EDIT_SeatS_FAILURE,
-//   payload: error.message || error.toString(),
-// });
+export const editSeatFailure = (error) => ({
+  type: EDIT_SEATS_FAILURE,
+  payload: error.message || error.toString(),
+});
 
-// export const editSeat = (id, SeatData) => {
-//   return (dispatch) => {
-//     return axios.put(`https://localhost:8000/api/Seats/${id}`, SeatData)
-//       .then(response => {
-//         dispatch(editSeatSuccess(response.data));
-//       })
-//       .catch(error => {
-//         dispatch(editSeatFailure(error));
-//       });
-//   };
-// };
-// export const fetchSeatDetails = (id) => {
-//   return (dispatch) => {
-//     return axios.get(`https://localhost:8000/api/Seats/${id}`)
-//       .then(response => {
-//         dispatch(fetchSeatsSuccess([response.data])); // You can adjust this based on your needs
-//       })
-//       .catch(error => {
-//         console.error("There was an error fetching Seat details!", error);
-//         dispatch(fetchSeatsFailure(error));
-//       });
-//   };
-// };
+export const editSeat = (id, seatData) => {
+  return (dispatch) => {
+    return axios.put(`http://localhost:5002/api/Seats/${id}`, seatData)
+      .then(response => {
+        dispatch(editSeatSuccess(response.data));
+      })
+      .catch(error => {
+        dispatch(editSeatFailure(error));
+      });
+  };
+};
+export const fetchSeatById = (id) => {
+  return (dispatch) => {
+    return axios.get(`http://localhost:5002/api/Seats/${id}`)
+      .then(response => {
+        dispatch(fetchSeatsSuccess(response.data)); // You can adjust this based on your needs
+      })
+      .catch(error => {
+        console.error("There was an error fetching Seat details!", error);
+        dispatch(fetchSeatsFailure(error));
+      });
+  };
+};
 //Add
 export const addSeatSuccess = (seat) => ({
     type: ADD_SEATS_SUCCESS,

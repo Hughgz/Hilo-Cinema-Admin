@@ -31,6 +31,7 @@ import Users from "views/admin/users";
 import Actors from "views/admin/stock/components/actor";
 import Producers from "views/admin/stock/components/producer";
 import Categories from "views/admin/stock/components/category";
+import Overview from "views/admin/profile";
 
 
 const routes = [

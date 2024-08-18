@@ -53,8 +53,9 @@ export default function HeaderLinks(props) {
   const handleSignIn = () => {
     history.push('/auth/sign-in');
   };
-  console.log("toggleColorMode: ", toggleColorMode)
-  console.log("ColorMode: ", colorMode)
+  
+  // console.log("toggleColorMode: ", toggleColorMode)
+  // console.log("ColorMode: ", colorMode)
   return (
     <Flex
       w={{ sm: "100%", md: "auto" }}

@@ -39,24 +39,29 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
     movieType: "",
     trailer: "",
     status: "",
+    movieUrl: "",  // Thêm trường movieUrl
+    imgSmall: null,  // Thêm trường imgSmall cho file mới
+    imgLarge: null,  // Thêm trường imgLarge cho file mới
   });
 
   const [errors, setErrors] = useState({});
   const [countries, setCountries] = useState([]);
+  const [currentImgSmall, setCurrentImgSmall] = useState(null);
+  const [currentImgLarge, setCurrentImgLarge] = useState(null);
 
   useEffect(() => {
     if (movie) {
       setFormData({ ...movie });
+      if (movie.imgSmallBase64) {
+        setCurrentImgSmall(`data:image/jpeg;base64,${movie.imgSmallBase64}`);
+      }
+      if (movie.imgLargeBase64) {
+        setCurrentImgLarge(`data:image/jpeg;base64,${movie.imgLargeBase64}`);
+      }
     } else {
-      dispatch(fetchMovieDetails(movieId)); // Tải thông tin chi tiết phim nếu không tìm thấy trong state
+      dispatch(fetchMovieDetails(movieId));
     }
   }, [movie, movieId, dispatch]);
-
-  useEffect(() => {
-    if (movie) {
-      setFormData({ ...movie });
-    }
-  }, [movie]);
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -113,6 +118,9 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
     if (!formData.status) {
       validationErrors.status = "Status is required";
     }
+    if (!formData.movieUrl) {
+      validationErrors.movieUrl = "Movie URL is required";
+    }
 
     return validationErrors;
   };
@@ -123,6 +131,18 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
     setErrors({ ...errors, [name]: "" });
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files.length > 0) {
+      setFormData({ ...formData, [name]: files[0] });
+      if (name === "imgSmall") {
+        setCurrentImgSmall(URL.createObjectURL(files[0]));
+      } else if (name === "imgLarge") {
+        setCurrentImgLarge(URL.createObjectURL(files[0]));
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
@@ -130,10 +150,17 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
       setErrors(validationErrors);
     } else {
       try {
-        await dispatch(editMovie(movieId, formData)); // Sử dụng action updateMovie để cập nhật phim
+        const formDataToSend = new FormData();
+        Object.keys(formData).forEach((key) => {
+          if (formData[key]) {
+            formDataToSend.append(key, formData[key]);
+          }
+        });
+
+        await dispatch(editMovie(movieId, formDataToSend));  // Sử dụng FormData để gửi dữ liệu
         alert("Cập nhật phim thành công");
         onClose(); // Đóng modal sau khi cập nhật thành công
-        fetchMovies(); // Gọi hàm fetchMovies để làm mới danh sách phim
+        fetchMovies(); // Làm mới danh sách phim
       } catch (error) {
         console.error("Error updating movie:", error.response ? error.response.data : error.message);
       }
@@ -148,7 +175,7 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Chỉnh sửa phim</ModalHeader>
+        <ModalHeader>Edit Movie</ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
           <form onSubmit={handleSubmit}>
@@ -259,16 +286,34 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
               </FormControl>
               <FormControl id="movieType" isInvalid={errors.movieType}>
                 <FormLabel color={textColor}>Movie Type</FormLabel>
-                <Input
-                  type="text"
+                <Select
                   name="movieType"
                   value={formData.movieType}
                   onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
+                >
+                  <option value="action">Action</option>
+                  <option value="adventure">Adventure</option>
+                  <option value="comedy">Comedy</option>
+                  <option value="drama">Drama</option>
+                  <option value="horror">Horror</option>
+                  <option value="romance">Romance</option>
+                  <option value="sci-fi">Science Fiction (Sci-Fi)</option>
+                  <option value="fantasy">Fantasy</option>
+                  <option value="thriller">Thriller</option>
+                  <option value="mystery">Mystery</option>
+                  <option value="documentary">Documentary</option>
+                  <option value="animation">Animation</option>
+                  <option value="musical">Musical</option>
+                  <option value="crime">Crime</option>
+                  <option value="biography">Biography (Biopic)</option>
+                  <option value="historical">Historical</option>
+                  <option value="war">War</option>
+                  <option value="western">Western</option>
+                  <option value="family">Family</option>
+                  <option value="sport">Sport</option>
+                  <option value="superhero">Superhero</option>
+                </Select>
+
                 {errors.movieType && <FormErrorMessage>{errors.movieType}</FormErrorMessage>}
               </FormControl>
               <FormControl id="trailer" isInvalid={errors.trailer}>
@@ -284,6 +329,46 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
                   _placeholder={{ color: "gray.500" }}
                 />
                 {errors.trailer && <FormErrorMessage>{errors.trailer}</FormErrorMessage>}
+              </FormControl>
+              <FormControl id="movieUrl" isInvalid={errors.movieUrl}>
+                <FormLabel color={textColor}>Movie URL</FormLabel>
+                <Input
+                  type="text"
+                  name="movieUrl"
+                  value={formData.movieUrl}
+                  onChange={handleChange}
+                  bg={inputBackgroundColor}
+                  border={0}
+                  color={textColor}
+                  _placeholder={{ color: "gray.500" }}
+                />
+                {errors.movieUrl && <FormErrorMessage>{errors.movieUrl}</FormErrorMessage>}
+              </FormControl>
+              <FormControl id="imgSmall">
+                <FormLabel color={textColor}>Small Image</FormLabel>
+                {currentImgSmall && <img src={currentImgSmall} alt="Current Small Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
+                <Input
+                  type="file"
+                  name="imgSmall"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  bg={inputBackgroundColor}
+                  border={0}
+                  color={textColor}
+                />
+              </FormControl>
+              <FormControl id="imgLarge">
+                <FormLabel color={textColor}>Large Image</FormLabel>
+                {currentImgLarge && <img src={currentImgLarge} alt="Current Large Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
+                <Input
+                  type="file"
+                  name="imgLarge"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  bg={inputBackgroundColor}
+                  border={0}
+                  color={textColor}
+                />
               </FormControl>
               <FormControl id="status" isInvalid={errors.status}>
                 <FormLabel color={textColor}>Status</FormLabel>
