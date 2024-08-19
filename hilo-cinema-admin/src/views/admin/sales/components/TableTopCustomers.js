@@ -89,15 +89,6 @@ const TopCustomerTable = ({ customers, loading, error }) => {
           onChange={(e) => setSearchValue(e.target.value)}
           mr={2}
         />
-        <Select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          mr={2}
-        >
-          <option value="name">Name</option>
-          <option value="email">Email</option>
-          <option value="phone">Phone</option>
-        </Select>
         <Button onClick={handleSearch}>Search</Button>
       </Flex>
 
@@ -107,7 +98,7 @@ const TopCustomerTable = ({ customers, loading, error }) => {
             <Tr>
               <Th>Name</Th>
               <Th>Gender</Th>
-              <Th>Total</Th> {/* Cột Total */}
+              
             </Tr>
           </Thead>
           <Tbody color={textColor}>
@@ -115,7 +106,7 @@ const TopCustomerTable = ({ customers, loading, error }) => {
               <Tr key={customer.id}>
                 <Td>{customer.name}</Td>
                 <Td>{customer.gender}</Td>
-                <Td>{customer.total || 0}</Td>
+                
               </Tr>
             ))}
           </Tbody>

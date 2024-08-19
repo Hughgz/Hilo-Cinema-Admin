@@ -22,7 +22,7 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { addMovie, fetchMovies } from "reduxHilo/actions/movieAction";
 
-const CreateMovieModal = ({ isOpen, onClose }) => {
+const CreateActor = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -363,8 +363,8 @@ const CreateMovieModal = ({ isOpen, onClose }) => {
                                     border={0}
                                     color={textColor}
                                 >
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Unavailable">Unavailable</option>
                                 </Select>
                                 {errors.status && <FormErrorMessage>{errors.status}</FormErrorMessage>}
                             </FormControl>
@@ -382,9 +382,9 @@ const CreateMovieModal = ({ isOpen, onClose }) => {
     );
 };
 
-CreateMovieModal.propTypes = {
+CreateActor.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
 };
 
-export default CreateMovieModal;
+export default CreateActor;

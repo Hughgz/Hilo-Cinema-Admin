@@ -88,7 +88,7 @@ export default function EditSeatForm({ seatId, onClose }) {
                 >
                     <option value="standard">Standard</option>
                     <option value="vip">VIP</option>
-                    <option value="double">Double</option>
+                    <option value="couple">Couple</option>
                 </Select>
 
                 <label>Status:</label>

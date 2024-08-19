@@ -72,21 +72,24 @@ export const searchCustomersFailure = (error) => ({
 });
 
 export const searchCustomers = (searchValue, searchField) => {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch(searchCustomersRequest());
-    return axios.get(`https://localhost:5005/api/Customer/Search`, {
-      params: {
-        searchValue: searchValue,
-        searchField: searchField
-      }
-    })
-      .then(response => {
-        dispatch(searchCustomersSuccess(response.data));
-      })
-      .catch(error => {
-        console.error("There was an error!", error);
-        dispatch(searchCustomersFailure(error));
+    try {
+      const response = await axios.get(`https://localhost:5005/api/Customer/Search`, {
+        params: {
+          searchValue: searchValue,
+          searchField: searchField,
+        },
       });
+      dispatch(searchCustomersSuccess(response.data));
+    } catch (error) {
+      // Kiểm tra mã lỗi và thay thế thông báo lỗi nếu là 404
+      if (error.response && error.response.status === 404) {
+        dispatch(searchCustomersFailure(new Error("No customer found")));
+      } else {
+        dispatch(searchCustomersFailure(error));
+      }
+    }
   };
 };
 export const clearSearchResults = () => ({

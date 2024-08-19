@@ -20,54 +20,54 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { fetchMovies, hiddenMovie } from "reduxHilo/actions/movieAction";
+import { fetchTheaters, hiddenTheater } from "reduxHilo/actions/theaterAction"; // Updated imports
 import Card from "components/card/Card";
-import Menu from "components/menu/MovieMenu";
-import EditMovieForm from "./EditMovieModal";
+import EditTheater from "./EditTheaterModal";
+import TheaterMenu from "components/menu/TheaterMenu";
 
-export default function DevelopmentTable(props) {
+export default function Theaters(props) {
   const { columnsData } = props;
   const columns = useMemo(() => columnsData, [columnsData]);
 
   const dispatch = useDispatch();
-  const { loading, movies, error } = useSelector((state) => state.movie);
+  const { loading, theaters, error } = useSelector((state) => state.theater); // Updated state to theaters
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedTheater, setSelectedTheater] = useState(null); // Updated state to theaters
   const [filterInput, setFilterInput] = useState("");
 
   useEffect(() => {
-    dispatch(fetchMovies());
+    dispatch(fetchTheaters()); // Updated function to fetch theaters
   }, [dispatch]);
 
-  const country = useMemo(() => {
-    const countrySet = new Set();
-    movies.forEach((movie) => {
-      if (movie.country) {
-        countrySet.add(movie.country);
+  const city = useMemo(() => {
+    const citySet = new Set();
+    theaters.forEach((theater) => { // Updated from movies to theaters
+      if (theater.city) {
+        citySet.add(theater.city);
       }
     });
-    return Array.from(countrySet);
-  }, [movies]);
+    return Array.from(citySet);
+  }, [theaters]);
 
   const data = useMemo(() => {
-    return movies
-      .filter((movie) => movie.status !== "inactive")
-      .filter((movie) =>
+    return theaters
+      .filter((theater) => theater.status !== "Inactive") // Updated from movies to theaters
+      .filter((theater) =>
         filterInput
-          ? movie.country &&
-            movie.country.toLowerCase().includes(filterInput.toLowerCase())
+          ? theater.city &&
+            theater.city.toLowerCase().includes(filterInput.toLowerCase())
           : true
       );
-  }, [movies, filterInput]);
+  }, [theaters, filterInput]); // Updated dependencies to theaters
 
   const handleEdit = (row) => {
-    setSelectedMovie(row.original);
+    setSelectedTheater(row.original); // Updated from movie to theater
     onOpen();
   };
 
   const handleHidden = (row) => {
-    dispatch(hiddenMovie(row.original.id));
+    dispatch(hiddenTheater(row.original.id)); // Updated function to hide theater
   };
 
   const columnsWithActions = useMemo(
@@ -88,7 +88,7 @@ export default function DevelopmentTable(props) {
               className="text-red-500 hover:text-red-700"
               onClick={() => handleHidden(row)}
             >
-              Hidden
+              Hide
             </Button>
           </div>
         ),
@@ -101,7 +101,7 @@ export default function DevelopmentTable(props) {
     {
       columns: columnsWithActions,
       data,
-      initialState: { pageIndex: 0, pageSize: 5 }, // Thiết lập trang đầu tiên và kích thước trang
+      initialState: { pageIndex: 0, pageSize: 5 },
     },
     useGlobalFilter,
     useSortBy,
@@ -137,18 +137,18 @@ export default function DevelopmentTable(props) {
             fontWeight="700"
             lineHeight="100%"
           >
-            Movies
+            Theaters
           </Text>
-          <Menu></Menu>
+          <TheaterMenu></TheaterMenu>
         </Flex>
         <Flex mb="20px" px="25px" justify="space-between" align="center">
           <Select
-            placeholder="Filter by country"
+            placeholder="Filter by city"
             value={filterInput}
             onChange={(e) => setFilterInput(e.target.value)}
             maxW="300px"
           >
-            {country.map((coun) => (
+            {city.map((coun) => (
               <option key={coun} value={coun}>
                 {coun}
               </option>
@@ -206,7 +206,6 @@ export default function DevelopmentTable(props) {
               </Tbody>
             </Table>
 
-            {/* Điều khiển phân trang */}
             <Flex justifyContent="center" alignItems="center" mt="4">
               <div className="flex space-x-2">
                 {pageOptions.map((pageNumber) => (
@@ -228,12 +227,12 @@ export default function DevelopmentTable(props) {
         )}
       </Card>
 
-      {selectedMovie && (
-        <EditMovieForm
+      {selectedTheater && (
+        <EditTheater
           isOpen={isOpen}
           onClose={onClose}
-          movieId={selectedMovie.id}
-          fetchMovies={fetchMovies}
+          theaterId={selectedTheater.id} // Updated from movieId to theaterId
+          fetchTheaters={fetchTheaters} // Updated function to fetch theaters
         />
       )}
     </>

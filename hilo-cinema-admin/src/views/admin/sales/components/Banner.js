@@ -226,7 +226,7 @@ export default function Banner({ roomId, rowNum, colNum }) {
                         seatClass = "bg-green-500 border-green-500"; // Ghế được chọn sẽ có màu xanh
                       } else if (seat.type === "vip") {
                         seatClass = "bg-red-500 border-red-500";
-                      } else if (seat.type === "double") {
+                      } else if (seat.type === "couple") {
                         seatClass = "bg-blue-500 border-blue-500";
                       }
 

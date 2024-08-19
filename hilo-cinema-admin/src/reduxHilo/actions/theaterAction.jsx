@@ -57,7 +57,7 @@ export const fetchTheaters = () => {
   };
 };
 
-// Edit Movie
+// Edit Theater
 export const editTheaterSuccess = (theater) => ({
   type: EDIT_THEATERS_SUCCESS,
   payload: theater,
@@ -110,7 +110,7 @@ export const fetchTheaterDetails = (id) => {
   };
 };
 
-// Add Movie
+// Add Theater
 export const addTheaterSuccess = (theater) => ({
   type: ADD_THEATERS_SUCCESS,
   payload: theater,
@@ -150,7 +150,7 @@ export const addTheater = (theaterData) => {
   };
 };
 
-// Hidden Movie
+//Hide Theater
 export const hiddenTheaterSuccess = (theater) => ({
   type: HIDDEN_THEATERS_SUCCESS,
   payload: theater,
@@ -167,7 +167,7 @@ export const hiddenTheater = (id) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`https://localhost:5001/api/THEATERS/Hidden/${id}`, {}, {
+    return axios.put(`http://localhost:5002/api/Theaters/Hide/${id}`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',

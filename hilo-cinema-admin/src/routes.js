@@ -125,20 +125,6 @@ const routes = [
     component: Sales,
   },
   {
-    name: "Time Management",
-    layout: "/admin",
-    path: "/timekeeping",
-    icon: <Icon as={MdPunchClock} width='20px' height='20px' color='inherit' />,
-    component: Timekeeping,
-  },
-  {
-    name: "Salary Management",
-    layout: "/admin",
-    path: "/salary",
-    icon: <Icon as={MdAttachMoney} width='20px' height='20px' color='inherit' />,
-    component: Salary,
-  },
-  {
     name: "Sign In",
     layout: "/auth",
     path: "/sign-in",

@@ -21,9 +21,9 @@ function VerifyOTP() {
                     <button class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onClick={handleSubmit}>
                         Verify
                     </button>
-                    <a class="inline-block align-baseline font-bold text-sm text-teal-500 hover:text-teal-800 ml-4" href="#">
+                    <button class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-3" type="button" onClick={handleSubmit}>
                         Resend OTP
-                    </a>
+                    </button>
                 </div>
             </form>
         </div>

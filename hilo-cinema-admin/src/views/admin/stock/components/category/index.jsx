@@ -1,13 +1,13 @@
 // Chakra imports
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import DevelopmentTable from "views/admin/stock/components/category/components/DevelopmentTable";
 import {
-  columnsDataDevelopment
-} from "views/admin/stock/components/category/variables/columnsData";
-import tableDataDevelopment from "views/admin/stock/components/category/variables/tableDataDevelopment.json";
+  columnsDataDevelopment,
+} from "views/admin/stock/components/movie/variables/columnsData";
+import tableDataDevelopment from "views/admin/stock/components/movie/variables/tableDataDevelopment.json";
 import React from "react";
+import Theaters from "./components/Theaters";
 
-export default function Categories() {
+export default function UserManagement() {
   // Chakra Color Mode
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
@@ -15,7 +15,7 @@ export default function Categories() {
         mb='20px'
         columns={{ sm: 1, md: 1 }}
         spacing={{ base: "20px", xl: "20px" }}>
-        <DevelopmentTable
+        <Theaters
           columnsData={columnsDataDevelopment}
           tableData={tableDataDevelopment}
         />

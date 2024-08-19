@@ -9,6 +9,7 @@ import seatReducer from "./seatReducer";
 import invoiceReducer from "./invoiceReducer";
 import theaterReducer from "./theaterReducer";
 import scheduleReducer from "./scheduleReducer";
+import actorReducer from "./actorReducer";
 
 export const allReducers = combineReducers({
     customer : customerReducer,
@@ -20,5 +21,6 @@ export const allReducers = combineReducers({
     seat : seatReducer,
     invoice : invoiceReducer,
     theater : theaterReducer,
-    schedule: scheduleReducer
+    schedule: scheduleReducer,
+    actor : actorReducer
 })
