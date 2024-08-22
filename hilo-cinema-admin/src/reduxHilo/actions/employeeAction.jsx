@@ -26,14 +26,31 @@ export const fetchEmployeesFailure = (error) => ({
 });
 
 export const fetchEmployees = () => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
     dispatch(fetchEmployeesRequest());
-    return axios.get("https://localhost:8000/api/Employees")
+
+    return axios.get("https://localhost:4000/api/EmployeeAuthen", {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
+      }
+    })
       .then(response => {
         dispatch(fetchEmployeesSuccess(response.data));
       })
       .catch(error => {
-        dispatch(fetchEmployeesFailure(error));
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(fetchEmployeesFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(fetchEmployeesFailure("Forbidden access"));
+        } else {
+          dispatch(fetchEmployeesFailure(error));
+        }
       });
   };
 };
@@ -50,13 +67,31 @@ export const editEmployeeFailure = (error) => ({
 });
 
 export const editEmployee = (id, employeeData) => {
-  return (dispatch) => {
-    return axios.put(`https://localhost:8000/api/Employees/${id}`, employeeData)
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    dispatch(fetchEmployeesRequest());
+
+    return axios.put(`https://localhost:4000/api/EmployeeAuthen/${id}`, employeeData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
+      }
+    })
       .then(response => {
         dispatch(editEmployeeSuccess(response.data));
       })
       .catch(error => {
-        dispatch(editEmployeeFailure(error));
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(editEmployeeFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(editEmployeeFailure("Forbidden access"));
+        } else {
+          dispatch(editEmployeeFailure(error));
+        }
       });
   };
 };
@@ -72,13 +107,31 @@ export const addEmployeeFailure = (error) => ({
 });
 
 export const addEmployee = (employeeData) => {
-  return (dispatch) => {
-    return axios.post("https://localhost:8000/api/Employees", employeeData)
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    dispatch(fetchEmployeesRequest());
+
+    return axios.post("https://localhost:4000/api/EmployeeAuthen/register", employeeData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
+      }
+    })
       .then(response => {
         dispatch(addEmployeeSuccess(response.data));
       })
       .catch(error => {
-        dispatch(addEmployeeFailure(error));
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(addEmployeeFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(addEmployeeFailure("Forbidden access"));
+        } else {
+          dispatch(addEmployeeFailure(error));
+        }
       });
   };
 };
@@ -95,16 +148,19 @@ export const updateEmployeeStatusFailure = (error) => ({
 });
 
 export const updateEmployeeStatus = (id) => {
-  return (dispatch) => {
-    return axios.put(
-      `https://localhost:8000/api/Employees/hidden/${id}`,
-      {}, // Không cần truyền dữ liệu trong body
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    dispatch(fetchEmployeesRequest());
+
+    return axios.put(`https://localhost:4000/api/EmployeeAuthen/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
       }
-    )
+    })
     .then(response => {
       dispatch(updateEmployeeStatusSuccess(response.data.employee));
     })
@@ -130,7 +186,7 @@ export const fetchEmployeesCount = () => {
       const state = getState();
       const token = state.auth.token;  // Giả sử token được lưu trữ trong state.auth.token
 
-      const response = await axios.get('https://localhost:8000/api/Employees/Count', {
+      const response = await axios.get('https://localhost:4000/api/EmployeeAuthen/Count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },
@@ -139,5 +195,28 @@ export const fetchEmployeesCount = () => {
     } catch (error) {
       dispatch(fetchEmployeesCountFailure(error));
     }
+  };
+};
+//
+export const fetchEmployeeById = (id) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    dispatch(fetchEmployeesRequest());
+
+    return axios.get(`https://localhost:4000/api/EmployeeAuthen/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      dispatch(fetchEmployeesSuccess(response.data.employee));
+    })
+    .catch(error => {
+      dispatch(fetchEmployeesFailure(error));
+    });
   };
 };

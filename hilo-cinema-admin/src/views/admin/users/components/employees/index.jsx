@@ -1,6 +1,5 @@
 // Chakra imports
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import DevelopmentTable from "views/admin/users/components/employees/components/DevelopmentTable";
 
 import {
   columnsDataDevelopment,
@@ -9,6 +8,7 @@ import {
 import tableDataDevelopment from "views/admin/users/components/employees/variables/tableDataDevelopment.json";
 
 import React from "react";
+import EmployeeList from "./components/Employees";
 
 export default function Employees() {
   // Chakra Color Mode
@@ -19,7 +19,7 @@ export default function Employees() {
         mb='20px'
         mt='30px'
         spacing={{ base: "20px", xl: "20px" }}>
-        <DevelopmentTable
+        <EmployeeList
           columnsData={columnsDataDevelopment}
           tableData={tableDataDevelopment}
         />

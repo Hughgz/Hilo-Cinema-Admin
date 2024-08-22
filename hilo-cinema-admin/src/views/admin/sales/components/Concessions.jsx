@@ -14,7 +14,7 @@ const imageMappings = {
   'img-food/beta-family.png': betaFamilyImage,
 };
 
-export default function HistoryItem({ image, name, cost }) {
+export default function Concessions({ image, name, cost }) {
   const textColor = useColorModeValue("brands.900", "white");
   const bgItem = useColorModeValue(
     { bg: "white", boxShadow: "0px 40px 58px -20px rgba(112, 144, 176, 0.12)" },

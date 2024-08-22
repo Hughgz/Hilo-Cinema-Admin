@@ -96,3 +96,30 @@ export const clearSearchResults = () => ({
   type: "CLEAR_SEARCH_RESULTS",
 });
 
+//Hide
+export const hideCustomerRequest = () => ({
+  type: "HIDE_CUSTOMER_REQUEST",
+});
+
+export const hideCustomerSuccess = (customerId) => ({
+  type: "HIDE_CUSTOMER_SUCCESS",
+  payload: customerId,
+});
+
+export const hideCustomerFailure = (error) => ({
+  type: "HIDE_CUSTOMER_FAILURE",
+  payload: error.message || error.toString(),
+});
+
+export const hideCustomer = (customerId) => {
+  return async (dispatch) => {
+    dispatch(hideCustomerRequest());
+    try {
+      await axios.put(`https://localhost:5005/api/Customer/Hide/${customerId}`);
+      dispatch(hideCustomerSuccess(customerId));
+    } catch (error) {
+      dispatch(hideCustomerFailure(error));
+    }
+  };
+};
+

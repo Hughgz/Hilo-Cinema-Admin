@@ -10,7 +10,10 @@ import {
   MdAccountBalance,
   MdMovie,
   MdPeople,
-  MdCategory
+  MdCategory,
+  MdRoom,
+  MdRoomService,
+  MdRoomPreferences
 } from "react-icons/md";
 // Admin Imports
 import MainDashboard from "views/admin/default";
@@ -31,7 +34,8 @@ import Actors from "views/admin/stock/components/actor";
 import Producers from "views/admin/stock/components/producer";
 import Categories from "views/admin/stock/components/category";
 import Overview from "views/admin/profile";
-import Customers from "views/admin/users/components/customers/components/CustomerList";
+import Rooms from "views/admin/stock/components/roomSeat";
+import Customers from "views/admin/users/components/customers";
 
 
 const routes = [
@@ -80,6 +84,13 @@ const routes = [
     path: "/stock",
     component: Stock,
     routes: [
+      {
+        name: "Rooms",
+        layout: "/admin",
+        icon: <Icon as={MdRoomPreferences} width='20px' height='20px' color='inherit' />,
+        path: "/stock/room",
+        component: Rooms,
+      },
       {
         name: "Movies",
         layout: "/admin",

@@ -44,7 +44,7 @@ export const fetchSeatsByRoom = (roomId) => {
       .catch((error) => {
         console.error("There was an error!", error);
         if (error.response && error.response.status === 404) {
-          dispatch(fetchSeatsFailure("Room này chưa có ghế, vui lòng thêm ghế"));
+          dispatch(fetchSeatsFailure("This room does not have seats, please add more seats"));
         } else {
           dispatch(fetchSeatsFailure(error.message || "Có lỗi xảy ra"));
         }

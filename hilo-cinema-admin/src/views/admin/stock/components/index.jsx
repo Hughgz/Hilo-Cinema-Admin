@@ -5,6 +5,7 @@ import Theaters from '../components/theater'
 import Actors from './actor';
 import Producers from './producer';
 import Categories from './category';
+import Rooms from './roomSeat';
 const Stock = () => {
   let { path } = useRouteMatch();
 
@@ -17,6 +18,7 @@ const Stock = () => {
         <Route path={`${path}/category`} component={Categories} />
         <Route path={`${path}/producer`} component={Producers} />
         <Route path={`${path}/actor`} component={Actors} />
+        <Route path={`${path}/room`} component={Rooms}></Route>
       </Switch>
     </div>
   );

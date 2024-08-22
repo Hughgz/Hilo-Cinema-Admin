@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectSeat, deselectSeat } from "../../../../reduxHilo/actions/bookingAction";
+import { selectSeat, deselectSeat } from "../../../../../../reduxHilo/actions/bookingAction";
 import { useColorModeValue, Button, ModalFooter } from "@chakra-ui/react";
-import { saveSeats } from "../../../../reduxHilo/actions/seatAction";
+import { saveSeats } from "../../../../../../reduxHilo/actions/seatAction";
 import ModalAlert from "components/alert/modalAlert"; // Import ModalAlert
 
 export default function AddSeatForm({ roomId, rowNum, colNum, onClose }) {

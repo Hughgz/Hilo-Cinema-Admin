@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Button,
   Flex,
   Grid,
   Text,
   Select,
-  useDisclosure,
+  Button,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCustomers } from "reduxHilo/actions/customerAction";
@@ -14,13 +13,12 @@ import { fetchRooms } from "reduxHilo/actions/roomAction";
 import { fetchTheaters } from "reduxHilo/actions/theaterAction";
 import { fetchMovies } from "reduxHilo/actions/movieAction";
 import { fetchSchedulesByMovieId } from "reduxHilo/actions/scheduleAction";
-import Banner from "./components/Banner";
-import AddRoomForm from "./components/AddRoomForm";
 import TopCustomerTable from "./components/TableTopCustomers";
-import HistoryItem from "views/admin/sales/components/HistoryItem";
 import Card from "components/card/Card.js";
 import tableDataConcessions from "views/admin/sales/variables/tableDataConcessions.json";
 import { clearSchedules } from "reduxHilo/actions/scheduleAction";
+import SeatList from "./components/SeatList";
+import Concessions from "./components/Concessions";
 
 export default function Sales() {
   const dispatch = useDispatch();
@@ -59,9 +57,7 @@ export default function Sales() {
     setSelectedRoom(null);
 
     // Clear schedules before fetching new ones
-    dispatch(clearSchedules());  // Sử dụng action clearSchedules
-
-    console.log("Selected movie ID:", selectedMovieId);
+    dispatch(clearSchedules());
 
     if (selectedMovieId) {
       dispatch(fetchSchedulesByMovieId(selectedMovieId))
@@ -138,15 +134,9 @@ export default function Sales() {
     return schedules.map((schedule) => ({
       value: `${schedule.date}-${schedule.time}`,
       label: `${schedule.date} - ${schedule.time}`,
-      roomId: schedule.roomId,  // Thêm roomId vào đây
+      roomId: schedule.roomId,
     }));
   }, [schedules, selectedMovie]);
-
-  const {
-    isOpen: isModalOpen,
-    onOpen: onModalOpen,
-    onClose: onModalClose,
-  } = useDisclosure();
 
   return (
     <Box pt={{ base: "180px", md: "80px", xl: "80px" }}>
@@ -213,26 +203,10 @@ export default function Sales() {
                 </option>
               ))}
             </Select>
-
-            <Button
-              bg="transparent"
-              color="blue.500"
-              border="1px solid"
-              borderColor="blue.500"
-              _hover={{ bg: "blue.500", color: "white" }}
-              _active={{ bg: "blue.600", color: "white" }}
-              borderRadius="md"
-              boxShadow="md"
-              px={10}
-              py={3}
-              onClick={onModalOpen}
-            >
-              Add Room
-            </Button>
           </Flex>
 
           {selectedRoom && (
-            <Banner
+            <SeatList
               roomId={selectedRoom.id}
               rowNum={selectedRoom.rowNum}
               colNum={selectedRoom.colNum}
@@ -266,7 +240,7 @@ export default function Sales() {
             </Flex>
 
             {tableDataConcessions.map((item, index) => (
-              <HistoryItem
+              <Concessions
                 key={index}
                 name={item.name}
                 image={item.image}
@@ -276,11 +250,6 @@ export default function Sales() {
           </Card>
         </Flex>
       </Grid>
-      <AddRoomForm
-        isOpen={isModalOpen}
-        onClose={onModalClose}
-        fetchRooms={() => dispatch(fetchRooms())}
-      />
     </Box>
   );
 }

@@ -64,11 +64,15 @@ export const editRoomFailure = (error) => ({
 
 export const editRoom = (id, roomData) => {
   return (dispatch, getState) => {
-    const token = getState().auth.token;
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
     return axios.put(`http://localhost:5002/api/Rooms/${id}`, roomData, {
       headers: {
-        Authorization: `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
       }
     })
       .then(response => {
@@ -93,11 +97,15 @@ export const addRoomFailure = (error) => ({
 
 export const addRoom = (roomData) => {
   return (dispatch, getState) => {
-    const token = getState().auth.token;
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
     return axios.post("http://localhost:5002/api/Rooms", roomData, {
       headers: {
-        Authorization: `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
       }
     })
       .then(response => {
@@ -105,6 +113,38 @@ export const addRoom = (roomData) => {
       })
       .catch(error => {
         dispatch(addRoomFailure(error));
+      });
+  };
+};
+
+//GetRoomByTheaterId
+export const fetchRoomsByTheaterId = (theaterId) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
+    dispatch(fetchRoomsRequest());
+
+    return axios.get(`http://localhost:5002/api/Rooms/GetRoomByTheater/${theaterId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        dispatch(fetchRoomsSuccess(response.data));
+      })
+      .catch(error => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(fetchRoomsFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(fetchRoomsFailure("Forbidden access"));
+        } else {
+          dispatch(fetchRoomsFailure(error));
+        }
       });
   };
 };

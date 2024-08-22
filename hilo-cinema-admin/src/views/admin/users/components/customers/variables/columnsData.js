@@ -8,16 +8,16 @@ export const columnsDataDevelopment = [
     accessor: "email",
   },
   {
+    Header: "ADDRESS",
+    accessor: "address",
+  },
+  {
     Header: "PHONE",
     accessor: "phone",
   },
   {
-    Header: "POSITION",
-    accessor: "position",
-  },
-  {
-    Header: "ROLE",
-    accessor: "sysRole",
+    Header: "GENDER",
+    accessor: "gender",
   },
   {
     Header: "STATUS",
