@@ -12,6 +12,12 @@ import {
   Tr,
   useColorModeValue,
   useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -33,6 +39,12 @@ export default function Movies(props) {
   const { loading, movies, error } = useSelector((state) => state.movie);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isAlertOpen,
+    onOpen: onAlertOpen,
+    onClose: onAlertClose,
+  } = useDisclosure();
+
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [filterInput, setFilterInput] = useState("");
 
@@ -67,7 +79,14 @@ export default function Movies(props) {
   };
 
   const handleHidden = (row) => {
-    dispatch(hiddenMovie(row.original.id));
+    setSelectedMovie(row.original);
+    onAlertOpen(); // Mở modal xác nhận
+  };
+
+  const confirmHidden = () => {
+    dispatch(hiddenMovie(selectedMovie.id));
+    onAlertClose(); // Đóng modal sau khi ẩn phim
+    dispatch(fetchMovies());
   };
 
   const columnsWithActions = useMemo(
@@ -79,13 +98,14 @@ export default function Movies(props) {
         Cell: ({ row }) => (
           <div>
             <Button
-              className="mr-2 text-blue-500 hover:text-blue-700"
+              colorScheme="blue"
+              mr={2}
               onClick={() => handleEdit(row)}
             >
               Edit
             </Button>
             <Button
-              className="text-red-500 hover:text-red-700"
+              colorScheme="red"
               onClick={() => handleHidden(row)}
             >
               Hide
@@ -101,7 +121,7 @@ export default function Movies(props) {
     {
       columns: columnsWithActions,
       data,
-      initialState: { pageIndex: 0, pageSize: 5 }, // Thiết lập trang đầu tiên và kích thước trang
+      initialState: { pageIndex: 0, pageSize: 5 },
     },
     useGlobalFilter,
     useSortBy,
@@ -206,7 +226,6 @@ export default function Movies(props) {
               </Tbody>
             </Table>
 
-            {/* Điều khiển phân trang */}
             <Flex justifyContent="center" alignItems="center" mt="4">
               <div className="flex space-x-2">
                 {pageOptions.map((pageNumber) => (
@@ -227,6 +246,31 @@ export default function Movies(props) {
           </>
         )}
       </Card>
+
+      {/* Modal Alert */}
+      <Modal isOpen={isAlertOpen} onClose={onAlertClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader fontSize="lg" fontWeight="bold">
+            Confirm Hide Movie
+          </ModalHeader>
+          <ModalBody>
+            <Text fontSize="md">
+              Are you sure you want to hide the movie "
+              <Text as="span" fontWeight="bold">
+                {selectedMovie?.title}
+              </Text>
+              "? This action cannot be undone.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" onClick={confirmHidden} mr={3}>
+              Hide
+            </Button>
+            <Button onClick={onAlertClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {selectedMovie && (
         <EditMovieForm

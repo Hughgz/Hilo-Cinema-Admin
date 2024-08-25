@@ -380,8 +380,8 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
                   border={0}
                   color={textColor}
                 >
-                  <option value="Available">Available</option>
-                  <option value="Unavailable">Unavailable</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </Select>
                 {errors.status && <FormErrorMessage>{errors.status}</FormErrorMessage>}
               </FormControl>
