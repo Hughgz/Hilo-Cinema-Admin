@@ -28,7 +28,7 @@ export const fetchRooms = () => {
     console.log(sysRole)
     dispatch(fetchRoomsRequest());
 
-    return axios.get("http://localhost:5002/api/Rooms", {
+    return axios.get("http://localhost:8000/RoomService", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -68,7 +68,7 @@ export const editRoom = (id, roomData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`http://localhost:5002/api/Rooms/${id}`, roomData, {
+    return axios.put(`http://localhost:8000/RoomService/${id}`, roomData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -101,7 +101,7 @@ export const addRoom = (roomData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.post("http://localhost:5002/api/Rooms", roomData, {
+    return axios.post("http://localhost:8000/RoomService", roomData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -126,7 +126,7 @@ export const fetchRoomsByTheaterId = (theaterId) => {
 
     dispatch(fetchRoomsRequest());
 
-    return axios.get(`http://localhost:5002/api/Rooms/GetRoomByTheater/${theaterId}`, {
+    return axios.get(`http://localhost:8000/RoomService/GetRoomByTheater/${theaterId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',

@@ -6,7 +6,10 @@ import {
   ADD_EMPLOYEE_FAILURE,
   UPDATE_EMPLOYEE_STATUS_SUCCESS, 
   UPDATE_EMPLOYEE_STATUS_FAILURE,
-  FETCH_MOVIES_COUNT_SUCCESS, FETCH_MOVIES_COUNT_FAILURE 
+  FETCH_MOVIES_COUNT_SUCCESS, FETCH_MOVIES_COUNT_FAILURE,
+  CHECK_EMAIL_EXISTS_REQUEST,CHECK_EMAIL_EXISTS_SUCCESS,
+  CHECK_EMAIL_EXISTS_FAILURE
+
 } from "../types/type";
 
 
@@ -32,7 +35,7 @@ export const fetchEmployees = () => {
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
     dispatch(fetchEmployeesRequest());
 
-    return axios.get("https://localhost:4000/api/EmployeeAuthen", {
+    return axios.get("http://localhost:8000/EmployeeService", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -73,7 +76,7 @@ export const editEmployee = (id, employeeData) => {
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
     dispatch(fetchEmployeesRequest());
 
-    return axios.put(`https://localhost:4000/api/EmployeeAuthen/${id}`, employeeData, {
+    return axios.put(`http://localhost:8000/EmployeeService/${id}`, employeeData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -111,9 +114,10 @@ export const addEmployee = (employeeData) => {
     const state = getState();
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    console.log(token)
     dispatch(fetchEmployeesRequest());
 
-    return axios.post("https://localhost:4000/api/EmployeeAuthen/register", employeeData, {
+    return axios.post("http://localhost:8000/EmployeeService", employeeData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -152,9 +156,10 @@ export const updateEmployeeStatus = (id) => {
     const state = getState();
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
     dispatch(fetchEmployeesRequest());
 
-    return axios.put(`https://localhost:4000/api/EmployeeAuthen/${id}`, {
+    return axios.put(`http://localhost:8000/EmployeeService/${id}/disable`, {},{
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -186,7 +191,7 @@ export const fetchEmployeesCount = () => {
       const state = getState();
       const token = state.auth.token;  // Giả sử token được lưu trữ trong state.auth.token
 
-      const response = await axios.get('https://localhost:4000/api/EmployeeAuthen/Count', {
+      const response = await axios.get('http://localhost:8000/EmployeeService/Count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },
@@ -205,7 +210,7 @@ export const fetchEmployeeById = (id) => {
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
     dispatch(fetchEmployeesRequest());
 
-    return axios.get(`https://localhost:4000/api/EmployeeAuthen/${id}`, {
+    return axios.get(`http://localhost:8000/EmployeeService/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
@@ -218,5 +223,46 @@ export const fetchEmployeeById = (id) => {
     .catch(error => {
       dispatch(fetchEmployeesFailure(error));
     });
+  };
+};
+//Check Mail
+export const checkEmailExistsRequest = () => ({
+  type: CHECK_EMAIL_EXISTS_REQUEST,
+});
+
+export const checkEmailExistsSuccess = (exists) => ({
+  type: CHECK_EMAIL_EXISTS_SUCCESS,
+  payload: exists,
+});
+
+export const checkEmailExistsFailure = (error) => ({
+  type: CHECK_EMAIL_EXISTS_FAILURE,
+  payload: error.message || error.toString(),
+});
+
+export const checkEmailExists = (email) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    dispatch(checkEmailExistsRequest());
+
+    return axios.post(`http://localhost:8000/EmployeeService/CheckEmail`, email, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        const emailExists = response.data.exists;
+        dispatch(checkEmailExistsSuccess(emailExists));
+        return emailExists;  // Trả về kết quả để có thể sử dụng trong component
+      })
+      .catch(error => {
+        console.error("There was an error!", error.message);
+        dispatch(checkEmailExistsFailure(error));
+        throw error;  // Ném ra lỗi để có thể xử lý trong component
+      });
   };
 };

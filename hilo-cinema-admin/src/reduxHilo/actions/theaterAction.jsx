@@ -34,7 +34,7 @@ export const fetchTheaters = () => {
 
     dispatch(fetchTheatersRequest());
 
-    return axios.get("http://localhost:5002/api/Theaters", {
+    return axios.get("http://localhost:8000/TheaterService", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -74,7 +74,7 @@ export const editTheater = (id, theaterData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`http://localhost:5002/api/Theaters/${id}`, theaterData, {
+    return axios.put(`http://localhost:8000/TheaterService/${id}`, theaterData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -99,7 +99,7 @@ export const editTheater = (id, theaterData) => {
 
 export const fetchTheaterDetails = (id) => {
   return (dispatch) => {
-    return axios.get(`http://localhost:5002/api/Theaters/${id}`)
+    return axios.get(`http://localhost:8000/TheaterService/${id}`)
       .then(response => {
         dispatch(fetchTheatersSuccess([response.data])); // You can adjust this based on your needs
       })
@@ -127,7 +127,7 @@ export const addTheater = (theaterData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.post("http://localhost:5002/api/Theaters", theaterData, {
+    return axios.post("http://localhost:8000/TheaterService", theaterData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -167,7 +167,7 @@ export const hiddenTheater = (id) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`http://localhost:5002/api/Theaters/Hide/${id}`, {}, {
+    return axios.put(`http://localhost:8000/TheaterService/${id}/disable`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',

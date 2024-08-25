@@ -204,7 +204,11 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm">Blog</Text>
+              <Link to="https://docs.google.com/presentation/d/1oKqzs1Vc2-6YUHzbdO-k42mArnat4WOtGPD-crRL9XA/edit#slide=id.g2f5ac0fc6b2_0_178">
+                <Text fontSize="md" fontWeight="600" color={textColor}>
+                  Sign In
+                </Text>
+            </Link>
             </MenuItem>
             <MenuItem
               _hover={{ bg: "none" }}

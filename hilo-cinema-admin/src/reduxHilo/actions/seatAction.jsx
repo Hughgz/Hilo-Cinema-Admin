@@ -21,7 +21,7 @@ export const fetchSeatsFailure = (error) => ({
 export const fetchSeats = () => {
     return (dispatch) => {
         dispatch(fetchSeatsRequest());
-        return axios.get("http://localhost:5002/api/Seats")
+        return axios.get("http://localhost:8000/SeatService")
             .then(response => {
                 dispatch(fetchSeatsSuccess(response.data));
             })
@@ -37,7 +37,7 @@ export const fetchSeatsByRoom = (roomId) => {
     dispatch(fetchSeatsRequest());
 
     return axios
-      .get(`http://localhost:5002/api/Seats/GetSeatsByRoom/${roomId}`)
+      .get(`http://localhost:8000/SeatService/GetSeatsByRoom/${roomId}`)
       .then((response) => {
         dispatch(fetchSeatsSuccess(response.data));
       })
@@ -64,19 +64,36 @@ export const editSeatFailure = (error) => ({
 });
 
 export const editSeat = (id, seatData) => {
-  return (dispatch) => {
-    return axios.put(`http://localhost:5002/api/Seats/${id}`, seatData)
-      .then(response => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
+    return axios.put(`http://localhost:8000/SeatService/${id}`, seatData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
         dispatch(editSeatSuccess(response.data));
       })
-      .catch(error => {
-        dispatch(editSeatFailure(error));
+      .catch((error) => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(editSeatFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(editSeatFailure("Forbidden access"));
+        } else {
+          dispatch(editSeatFailure(error));
+        }
       });
   };
 };
 export const fetchSeatById = (id) => {
   return (dispatch) => {
-    return axios.get(`http://localhost:5002/api/Seats/${id}`)
+    return axios.get(`http://localhost:8000/SeatService/${id}`)
       .then(response => {
         dispatch(fetchSeatsSuccess(response.data)); // You can adjust this based on your needs
       })
@@ -99,7 +116,7 @@ export const addSeatFailure = (error) => ({
 
 export const addSeat = (seatData) => {
     return (dispatch) => {
-        return axios.post("http://localhost:5002/api/Seats", seatData)
+        return axios.post("http://localhost:8000/SeatService", seatData)
             .then(response => {
                 dispatch(addSeatSuccess(response.data));
             })
@@ -109,34 +126,56 @@ export const addSeat = (seatData) => {
     };
 };
 export const saveSeats = (seats) => {
-    return async (dispatch) => {
-      try {
-        const seatData = seats.map(seat => ({
-          roomId: seat.roomId,
-          colSeat: seat.colSeat,
-          rowSeat: seat.rowSeat,
-          name: seat.name,
-          type: seat.type || 'standard',
-          status: seat.status || 'available'
-        }));
-        
-        const response = await axios.post("http://localhost:5002/api/Seats", seatData);
-  
+  return async (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
+    try {
+      const seatData = seats.map(seat => ({
+        roomId: seat.roomId,
+        colSeat: seat.colSeat,
+        rowSeat: seat.rowSeat,
+        name: seat.name,
+        type: seat.type || 'standard',
+        status: seat.status || 'available'
+      }));
+      
+      const response = await axios.post("http://localhost:8000/SeatService", seatData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Site-Type': sysRole || 'default',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      dispatch({
+        type: ADD_SEATS_SUCCESS,
+        payload: response.data,
+      });
+
+      return Promise.resolve(response.data); // Trả về thành công
+    } catch (error) {
+      console.error("There was an error saving seats!", error.message);
+
+      if (error.response && error.response.status === 401) {
         dispatch({
-          type: ADD_SEATS_SUCCESS,
-          payload: response.data,
+          type: ADD_SEATS_FAILURE,
+          payload: "Unauthorized access",
         });
-  
-        return Promise.resolve(response.data); // Trả về thành công
-      } catch (error) {
-        console.error("There was an error saving seats!", error);
-  
+      } else if (error.response && error.response.status === 403) {
+        dispatch({
+          type: ADD_SEATS_FAILURE,
+          payload: "Forbidden access",
+        });
+      } else {
         dispatch({
           type: ADD_SEATS_FAILURE,
           payload: error.response?.data || error.message || error.toString(),
         });
-  
-        return Promise.reject(error); // Trả về lỗi
       }
-    };
+
+      return Promise.reject(error); // Trả về lỗi
+    }
   };
+};

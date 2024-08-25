@@ -24,6 +24,7 @@ import { fetchEmployees, updateEmployeeStatus } from "reduxHilo/actions/employee
 import Card from "components/card/Card";
 import EmployeeMenu from "components/menu/EmployeeMenu";
 import EditEmployeeForm from "./EditEmployee";
+import ModalAlert from "components/alert/modalAlert";
 
 export default function EmployeeList(props) {
   const { columnsData } = props;
@@ -35,22 +36,31 @@ export default function EmployeeList(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [filterInput, setFilterInput] = useState("");
+  
+  // State for ModalAlert
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState("success");
+
+
+  const positions = useMemo(() => {
+    const posSet = new Set();
+    if (employees && employees.length > 0) {
+      employees.forEach((employee) => {
+        if (employee.position) {
+          posSet.add(employee.position);
+        }
+      });
+    }
+    return Array.from(posSet);
+  }, [employees]);
 
   useEffect(() => {
     dispatch(fetchEmployees());
   }, [dispatch]);
-
-  const positions = useMemo(() => {
-    const posSet = new Set();
-    employees.forEach((employee) => {
-      if (employee.position) {
-        posSet.add(employee.position);
-      }
-    });
-    return Array.from(posSet);
-  }, [employees]);
-
+  
   const data = useMemo(() => {
+    if (!employees || employees.length === 0) return [];
     return employees
       .filter((employee) => employee.status !== "Inactive") // Exclude inactive employees
       .filter((employee) =>
@@ -62,13 +72,42 @@ export default function EmployeeList(props) {
   }, [employees, filterInput]);
 
   const handleEdit = (row) => {
+    console.log("Row data:", row);
+    if (!row || !row.original) {
+      console.error("Row or original data is undefined.");
+      return;
+    }
     setSelectedEmployee(row.original);
     onOpen();
   };
 
   const handleDelete = (row) => {
-    dispatch(updateEmployeeStatus(row.original.id));
+    const employeeId = row?.original?.id;
+    if (!employeeId) {
+      console.error("ID is undefined.");
+      return;
+    }
+  
+    dispatch(updateEmployeeStatus(employeeId))
+      .then(() => {
+        setModalMessage("Employee has been successfully hidden.");
+        setModalType("success");
+        setModalVisible(true);
+  
+        // Reload the employees list after successful update
+        dispatch(fetchEmployees()).then(() => {
+          // Ensure that selectedEmployee is cleared if it no longer exists
+          setSelectedEmployee(null);
+        });
+      })
+      .catch((error) => {
+        setModalMessage("Failed to hide employee. Please try again.");
+        setModalType("error");
+        setModalVisible(true);
+        console.error("Failed to update employee status:", error);
+      });
   };
+  
 
   const columnsWithActions = useMemo(
     () => [
@@ -153,6 +192,8 @@ export default function EmployeeList(props) {
           <Text>Loading...</Text>
         ) : error ? (
           <Text color="red.500">{error}</Text>
+        ) : !employees || employees.length === 0 ? (
+          <Text>No employees found.</Text>
         ) : (
           <>
             <Table
@@ -228,9 +269,17 @@ export default function EmployeeList(props) {
             setSelectedEmployee(null); // Clear the selected employee after closing
           }}
           fetchEmployees={() => dispatch(fetchEmployees())}
-          employeeId={selectedEmployee.id}
+          employeeId={selectedEmployee ? selectedEmployee.id : null}
         />
       )}
+
+      {/* Modal Alert */}
+      <ModalAlert
+        message={modalMessage}
+        type={modalType}
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </>
   );
 }

@@ -67,8 +67,9 @@ export default function CustomerList(props) {
     onOpen();
   };
 
-  const handleHide = (customerId) => {
-    dispatch(hideCustomer(customerId));
+  const handleHide = (row) => {
+    console.log(row.original.id)
+    dispatch(hideCustomer(row.original.id));
   };
 
   const columnsWithActions = useMemo(

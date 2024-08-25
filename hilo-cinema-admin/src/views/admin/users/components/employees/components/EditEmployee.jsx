@@ -82,7 +82,7 @@ const EditEmployeeForm = ({ isOpen, onClose, fetchEmployees, employeeId }) => {
     } else {
       try {
         await dispatch(editEmployee(employeeId, formData)); // Update with theater details
-        alert("Cập nhật rạp chiếu phim thành công");
+        alert("Cập nhật nhân viên phim thành công");
         onClose(); // Close modal after successful update
         fetchEmployees(); // Refresh the employee list
       } catch (error) {

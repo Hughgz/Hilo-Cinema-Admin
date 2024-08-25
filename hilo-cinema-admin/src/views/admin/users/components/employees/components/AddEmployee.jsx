@@ -17,9 +17,9 @@ import {
     FormErrorMessage,
     Stack,
 } from "@chakra-ui/react";
-import axios from "axios";
 import PropTypes from "prop-types";
 import { addEmployee, fetchEmployees } from "reduxHilo/actions/employeeAction";
+import { checkEmailExists } from "reduxHilo/actions/employeeAction";
 
 const AddEmployeeForm = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
@@ -38,23 +38,77 @@ const AddEmployeeForm = ({ isOpen, onClose }) => {
     });
 
     const [errors, setErrors] = useState({});
+    const [passwordStrength, setPasswordStrength] = useState({
+        length: false,
+        lowercase: false,
+        uppercase: false,
+        numbers: false,
+        specialCharacters: false,
+        level: "Empty",
+    });
 
-    const validate = () => {
+    const validate = async () => {
         let validationErrors = {};
 
         if (!formData.name) validationErrors.name = 'Name is required';
+
         if (!formData.email) {
             validationErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             validationErrors.email = 'Email address is invalid';
+        } else {
+            try {
+                const emailExists = await dispatch(checkEmailExists(formData.email));
+                console.log(formData.email);
+                console.log(emailExists);
+                if (emailExists) {
+                    validationErrors.email = 'Email already exists. Please try another email.';
+                }
+            } catch (error) {
+                validationErrors.email = 'Failed to check email existence. Please try again later.';
+            }
+            
         }
-        if (!formData.phone) validationErrors.phone = 'Phone number is required';
+
+        if (!formData.phone) {
+            validationErrors.phone = 'Phone number is required';
+        } else if (!/^\d{10}$/.test(formData.phone)) {
+            validationErrors.phone = 'Phone number must be 10 digits';
+        }
+
         if (!formData.address) validationErrors.address = 'Address is required';
+
         if (!formData.gender) validationErrors.gender = 'Gender is required';
-        if (!formData.birthdate) validationErrors.birthdate = 'Birthdate is required';
-        if (!formData.password) validationErrors.password = 'Password is required';
+
+        if (!formData.birthdate) {
+            validationErrors.birthdate = 'Birthdate is required';
+        } else {
+            const today = new Date();
+            const birthDate = new Date(formData.birthdate);
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            if (age < 18) {
+                validationErrors.birthdate = 'Employee must be at least 18 years old';
+            }
+        }
+
+        if (!formData.password) {
+            validationErrors.password = 'Password is required';
+        } else if (formData.password.length < 6) {
+            validationErrors.password = 'Password must be at least 6 characters long';
+        } else if (!/[A-Z]/.test(formData.password)) {
+            validationErrors.password = 'Password must contain at least one uppercase letter';
+        } else if (!/[!@#$%^&*]/.test(formData.password)) {
+            validationErrors.password = 'Password must contain at least one special character';
+        }
+
         if (!formData.position) validationErrors.position = 'Position is required';
+
         if (!formData.sysRole) validationErrors.sysRole = 'System role is required';
+
         if (!formData.status) validationErrors.status = 'Status is required';
 
         return validationErrors;
@@ -66,24 +120,70 @@ const AddEmployeeForm = ({ isOpen, onClose }) => {
         setErrors({ ...errors, [name]: '' });  // Clear error when user starts typing
     };
 
+    useEffect(() => {
+        const password = formData.password;
+        const length = password.length >= 6;
+        const lowercase = /[a-z]/.test(password);
+        const uppercase = /[A-Z]/.test(password);
+        const numbers = /[0-9]/.test(password);
+        const specialCharacters = /[!@#$%^&*]/.test(password);
+
+        let level = "Empty";
+        const checks = [length, lowercase, uppercase, numbers, specialCharacters];
+        const passedChecks = checks.filter(check => check).length;
+
+        switch (passedChecks) {
+            case 0:
+                level = "Empty";
+                break;
+            case 1:
+            case 2:
+                level = "Weak";
+                break;
+            case 3:
+                level = "Medium";
+                break;
+            case 4:
+                level = "Strong";
+                break;
+            case 5:
+                level = "Very Strong";
+                break;
+            default:
+                level = "Empty";
+        }
+
+        // Sử dụng setPasswordStrength thay vì gán trực tiếp
+        setPasswordStrength({
+            length,
+            lowercase,
+            uppercase,
+            numbers,
+            specialCharacters,
+            level,
+        });
+    }, [formData.password]);
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const validationErrors = validate();
+
+        console.log("Form submitted");
+        const validationErrors = await validate();
+        console.log("Validation errors:", validationErrors);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-        } else {
-            try {
-                await dispatch(addEmployee(formData));
-                alert("Employee added successfully");
-                onClose(); // Close modal after success
-                dispatch(fetchEmployees()); // Refresh employee list
-            } catch (error) {
-                if (error.response && error.response.data.message.includes('Email already exists')) {
-                    setErrors({ email: 'Email already exists. Please try another email.' });
-                } else {
-                    alert("An unexpected error occurred. Please try again.");
-                }
-            }
+            return;
+        }
+
+        try {
+            await dispatch(addEmployee(formData));
+            alert("Employee added successfully");
+            onClose();
+            dispatch(fetchEmployees());
+        } catch (error) {
+            console.error("Error adding employee:", error);
+            alert("An unexpected error occurred. Please try again.");
         }
     };
 
@@ -199,6 +299,35 @@ const AddEmployeeForm = ({ isOpen, onClose }) => {
                                     _placeholder={{ color: "gray.500" }}
                                 />
                                 {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
+                                <div id="hs-strong-password-hints" className="mb-3">
+                                    <div>
+                                        <span className="text-sm text-gray-800 dark:text-neutral-200">Level: </span>
+                                        <span className="text-sm font-semibold text-gray-800 dark:text-neutral-200">{passwordStrength.level}</span>
+                                    </div>
+                                    <div className="flex mt-2 -mx-1">
+                                        <div className={`hs-strong-password h-2 flex-auto rounded-full mx-1 ${passwordStrength.level === 'Empty' ? 'bg-gray-300' : ''} ${passwordStrength.level === 'Weak' ? 'bg-red-400' : ''} ${passwordStrength.level === 'Medium' ? 'bg-yellow-400' : ''} ${passwordStrength.level === 'Strong' ? 'bg-green-400' : ''} ${passwordStrength.level === 'Very Strong' ? 'bg-green-600' : ''}`}></div>
+                                    </div>
+                                    <h4 className="my-2 text-sm font-semibold" color={textColor}>
+                                        Your password must contain:
+                                    </h4>
+                                    <ul className="space-y-1 text-sm text-gray-500 dark:text-neutral-500">
+                                        <li className={`flex items-center gap-x-2 ${passwordStrength.length ? 'text-teal-500' : ''}`}>
+                                            {passwordStrength.length ? '✔' : '✖'} Minimum number of characters is 6.
+                                        </li>
+                                        <li className={`flex items-center gap-x-2 ${passwordStrength.lowercase ? 'text-teal-500' : ''}`}>
+                                            {passwordStrength.lowercase ? '✔' : '✖'} Should contain lowercase.
+                                        </li>
+                                        <li className={`flex items-center gap-x-2 ${passwordStrength.uppercase ? 'text-teal-500' : ''}`}>
+                                            {passwordStrength.uppercase ? '✔' : '✖'} Should contain uppercase.
+                                        </li>
+                                        <li className={`flex items-center gap-x-2 ${passwordStrength.numbers ? 'text-teal-500' : ''}`}>
+                                            {passwordStrength.numbers ? '✔' : '✖'} Should contain numbers.
+                                        </li>
+                                        <li className={`flex items-center gap-x-2 ${passwordStrength.specialCharacters ? 'text-teal-500' : ''}`}>
+                                            {passwordStrength.specialCharacters ? '✔' : '✖'} Should contain special characters.
+                                        </li>
+                                    </ul>
+                                </div>
                             </FormControl>
                             <FormControl id="position" isInvalid={errors.position}>
                                 <FormLabel color={textColor}>Position</FormLabel>

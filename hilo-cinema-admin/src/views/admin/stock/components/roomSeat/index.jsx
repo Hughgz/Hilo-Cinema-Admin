@@ -56,7 +56,7 @@ export default function Rooms() {
     if (selectedTheater) {
       return rooms.map((room) => ({
         value: room.id,
-        label: `${room.name} - ${room.theaterName || "Unknown Theater"}`,
+        label: `${room.name}`,
       }));
     }
     return [];

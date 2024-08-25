@@ -33,7 +33,7 @@ export const fetchMovies = () => {
 
     dispatch(fetchMoviesRequest());
 
-    return axios.get("https://localhost:5001/api/Movies", {
+    return axios.get("http://localhost:8000/MovieService", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -73,7 +73,7 @@ export const editMovie = (id, movieData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`https://localhost:5001/api/Movies/${id}`, movieData, {
+    return axios.put(`http://localhost:8000/MovieService/${id}`, movieData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -98,7 +98,7 @@ export const editMovie = (id, movieData) => {
 
 export const fetchMovieDetails = (id) => {
   return (dispatch) => {
-    return axios.get(`https://localhost:5001/api/Movies/${id}`)
+    return axios.get(`http://localhost:8000/MovieService/${id}`)
       .then(response => {
         dispatch(fetchMoviesSuccess([response.data])); // You can adjust this based on your needs
       })
@@ -126,7 +126,7 @@ export const addMovie = (movieData) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.post("https://localhost:5001/api/Movies", movieData, {
+    return axios.post("http://localhost:8000/MovieService", movieData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -166,7 +166,7 @@ export const hiddenMovie = (id) => {
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    return axios.put(`https://localhost:5001/api/Movies/Hidden/${id}`, {}, {
+    return axios.put(`http://localhost:8000/MovieService/${id}/disable`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -205,7 +205,7 @@ export const fetchMoviesCount = () => {
       const state = getState();
       const token = state.auth.token;
 
-      const response = await axios.get('https://localhost:5001/api/Movies/Count', {
+      const response = await axios.get('http://localhost:8000/MovieService/Count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },

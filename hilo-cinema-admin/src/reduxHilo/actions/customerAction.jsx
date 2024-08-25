@@ -1,33 +1,52 @@
 import axios from "axios";
 
+// Fetch Customers Actions
 export const fetchCustomersRequest = () => ({
-  type: "FETCH_CUSTOMERS_REQUEST"
+  type: "FETCH_CUSTOMERS_REQUEST",
 });
 
 export const fetchCustomersSuccess = (customers) => ({
   type: "FETCH_CUSTOMERS_SUCCESS",
-  payload: customers
+  payload: customers,
 });
 
 export const fetchCustomersFailure = (error) => ({
   type: "FETCH_CUSTOMERS_FAILURE",
-  payload: error.message || error.toString()
+  payload: error.message || error.toString(),
 });
 
 export const fetchCustomers = () => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
     dispatch(fetchCustomersRequest());
-    return axios.get("https://localhost:5005/api/Customer")
+
+    return axios.get("http://localhost:8000/CustomerService", {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json'
+      }
+    })
       .then(response => {
         dispatch(fetchCustomersSuccess(response.data));
       })
       .catch(error => {
-        console.error("There was an error!", error);
-        dispatch(fetchCustomersFailure(error));
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(fetchCustomersFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(fetchCustomersFailure("Forbidden access"));
+        } else {
+          dispatch(fetchCustomersFailure(error));
+        }
       });
   };
 };
-//Total Customer
+
+// Fetch Customer Count Actions
 export const fetchCustomersCountSuccess = (count) => ({
   type: "FETCH_CUSTOMERS_COUNT_SUCCESS",
   payload: count,
@@ -39,64 +58,87 @@ export const fetchCustomersCountFailure = (error) => ({
 });
 
 export const fetchCustomerCount = () => {
-  return async (dispatch, getState) => {
-    try {
-      const state = getState();
-      const token = state.auth.token;
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-      const response = await axios.get('https://localhost:5005/api/Customer/Count', {
-        headers: {
-          'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
-        },
+    return axios.get("http://localhost:8000/CustomerService/Count", {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        dispatch(fetchCustomersCountSuccess(response.data));
+      })
+      .catch(error => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(fetchCustomersCountFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(fetchCustomersCountFailure("Forbidden access"));
+        } else {
+          dispatch(fetchCustomersCountFailure(error));
+        }
       });
-      dispatch(fetchCustomersCountSuccess(response.data));
-    } catch (error) {
-      dispatch(fetchCustomersCountFailure(error));
-    }
   };
 };
 
-//Search
+// Search Customers Actions
 export const searchCustomersRequest = () => ({
-  type: "SEARCH_CUSTOMERS_REQUEST"
+  type: "SEARCH_CUSTOMERS_REQUEST",
 });
 
 export const searchCustomersSuccess = (customers) => ({
   type: "SEARCH_CUSTOMERS_SUCCESS",
-  payload: customers
+  payload: customers,
 });
 
 export const searchCustomersFailure = (error) => ({
   type: "SEARCH_CUSTOMERS_FAILURE",
-  payload: error.message || error.toString()
+  payload: error.message || error.toString(),
 });
 
 export const searchCustomers = (searchValue, searchField) => {
-  return async (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
     dispatch(searchCustomersRequest());
-    try {
-      const response = await axios.get(`https://localhost:5005/api/Customer/Search`, {
-        params: {
-          searchValue: searchValue,
-          searchField: searchField,
-        },
-      });
-      dispatch(searchCustomersSuccess(response.data));
-    } catch (error) {
-      // Kiểm tra mã lỗi và thay thế thông báo lỗi nếu là 404
-      if (error.response && error.response.status === 404) {
-        dispatch(searchCustomersFailure(new Error("No customer found")));
-      } else {
-        dispatch(searchCustomersFailure(error));
+
+    return axios.get("http://localhost:8000/CustomerService/Search", {
+      params: {
+        searchValue: searchValue,
+        searchField: searchField,
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json'
       }
-    }
+    })
+      .then(response => {
+        dispatch(searchCustomersSuccess(response.data));
+      })
+      .catch(error => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 404) {
+          dispatch(searchCustomersFailure(new Error("No customer found")));
+        } else if (error.response && error.response.status === 401) {
+          dispatch(searchCustomersFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(searchCustomersFailure("Forbidden access"));
+        } else {
+          dispatch(searchCustomersFailure(error));
+        }
+      });
   };
 };
-export const clearSearchResults = () => ({
-  type: "CLEAR_SEARCH_RESULTS",
-});
 
-//Hide
+// Hide Customer Actions
 export const hideCustomerRequest = () => ({
   type: "HIDE_CUSTOMER_REQUEST",
 });
@@ -112,14 +154,36 @@ export const hideCustomerFailure = (error) => ({
 });
 
 export const hideCustomer = (customerId) => {
-  return async (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
     dispatch(hideCustomerRequest());
-    try {
-      await axios.put(`https://localhost:5005/api/Customer/Hide/${customerId}`);
-      dispatch(hideCustomerSuccess(customerId));
-    } catch (error) {
-      dispatch(hideCustomerFailure(error));
-    }
+
+    return axios.put(`http://localhost:8000/CustomerService/${customerId}/disable`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(() => {
+        dispatch(hideCustomerSuccess(customerId));
+      })
+      .catch(error => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(hideCustomerFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(hideCustomerFailure("Forbidden access"));
+        } else {
+          dispatch(hideCustomerFailure(error));
+        }
+      });
   };
 };
 
+export const clearSearchResults = () => ({
+  type: "CLEAR_SEARCH_RESULTS",
+});

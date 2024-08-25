@@ -14,7 +14,7 @@ export const login = (credentials) => {
   return async (dispatch) => {
     dispatch({ type: LOGIN_REQUEST });
     try {
-      const response = await fetch('https://localhost:4000/api/EmployeeAuthen/authenticate', {
+      const response = await fetch('http://localhost:8000/EmployeeAuthen', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export const fetchEmployeesFailure = (error) => ({
 export const fetchEmployees = () => {
   return (dispatch) => {
     dispatch(fetchEmployeesRequest());
-    return axios.get("https://localhost:4000/api/EmployeeAuthen")
+    return axios.get("http://localhost:8000/EmployeeAuthen")
       .then(response => {
         dispatch(fetchEmployeesSuccess(response.data));
       })
@@ -101,7 +101,7 @@ export const editEmployeeFailure = (error) => ({
 
 export const editEmployee = (id, employeeData) => {
   return (dispatch) => {
-    return axios.put(`https://localhost:4000/api/EmployeeAuthen/${id}`, employeeData)
+    return axios.put(`http://localhost:8000/EmployeeAuthen/${id}`, employeeData)
       .then(response => {
         dispatch(editEmployeeSuccess(response.data));
       })
@@ -123,7 +123,7 @@ export const addEmployeeFailure = (error) => ({
 
 export const addEmployee = (employeeData) => {
   return (dispatch) => {
-    return axios.post("https://localhost:4000/api/EmployeeAuthen", employeeData)
+    return axios.post("http://localhost:8000/EmployeeAuthen", employeeData)
       .then(response => {
         dispatch(addEmployeeSuccess(response.data));
       })
@@ -147,7 +147,7 @@ export const updateEmployeeStatusFailure = (error) => ({
 export const updateEmployeeStatus = (id) => {
   return (dispatch) => {
     return axios.put(
-      `https://localhost:4000/api/EmployeeAuthen/hidden/${id}`,
+      `http://localhost:8000/EmployeeAuthen/hidden/${id}`,
       {}, // Không cần truyền dữ liệu trong body
       {
         headers: {
@@ -180,7 +180,7 @@ export const fetchEmployeesCount = () => {
       const state = getState();
       const token = state.auth.token;  // Giả sử token được lưu trữ trong state.auth.token
 
-      const response = await axios.get('https://localhost:4000/api/EmployeeAuthen/Count', {
+      const response = await axios.get('http://localhost:8000/EmployeeService/Count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },
