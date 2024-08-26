@@ -12,6 +12,12 @@ import {
   Tr,
   useColorModeValue,
   useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,54 +26,74 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { fetchMovies, hiddenMovie } from "reduxHilo/actions/movieAction";
 import Card from "components/card/Card";
-import Menu from "components/menu/MovieMenu";
-import EditTheater from "./EditTheaterModal";
+import ActorMenu from "components/menu/ActorMenu";
+import EditActorForm from "./EditActor";
+import { fetchActors, fetchActorsByMovieId, hiddenActor } from "reduxHilo/actions/actorAction";
+import { fetchMovies } from "reduxHilo/actions/movieAction";
 
-export default function Theaters(props) {
+export default function Actors(props) {
   const { columnsData } = props;
   const columns = useMemo(() => columnsData, [columnsData]);
 
   const dispatch = useDispatch();
-  const { loading, movies, error } = useSelector((state) => state.movie);
-
+  const { loading, actors, error } = useSelector((state) => state.actor);
+  const { movies } = useSelector((state) => state.movie);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [filterInput, setFilterInput] = useState("");
+  const {
+    isOpen: isAlertOpen,
+    onOpen: onAlertOpen,
+    onClose: onAlertClose,
+  } = useDisclosure();
 
+  const [selectedActor, setSelectedActor] = useState(null);
+  const [filterInput, setFilterInput] = useState(""); // This will store the selected movieId
+
+  // Fetch all movies and actors when the component mounts
   useEffect(() => {
     dispatch(fetchMovies());
+    dispatch(fetchActors());
   }, [dispatch]);
 
-  const country = useMemo(() => {
-    const countrySet = new Set();
-    movies.forEach((movie) => {
-      if (movie.country) {
-        countrySet.add(movie.country);
-      }
-    });
-    return Array.from(countrySet);
+  // Fetch actors based on the selected movieId
+  useEffect(() => {
+    if (filterInput) {
+      dispatch(fetchActorsByMovieId(filterInput));
+    } else {
+      dispatch(fetchActors());
+    }
+  }, [dispatch, filterInput]);
+
+  const titleMovie = useMemo(() => {
+    return movies.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+    }));
   }, [movies]);
 
   const data = useMemo(() => {
-    return movies
-      .filter((movie) => movie.status !== "inactive")
-      .filter((movie) =>
-        filterInput
-          ? movie.country &&
-            movie.country.toLowerCase().includes(filterInput.toLowerCase())
-          : true
-      );
-  }, [movies, filterInput]);
+    return actors.filter((actor) => actor.status !== "Inactive");
+  }, [actors]);
 
   const handleEdit = (row) => {
-    setSelectedMovie(row.original);
+    setSelectedActor(row.original);
     onOpen();
   };
 
   const handleHidden = (row) => {
-    dispatch(hiddenMovie(row.original.id));
+    const actor = row.original;
+    console.log('Selected Actor ID:', actor.id);  // This should show the correct ID
+    setSelectedActor(actor);
+    onAlertOpen();
+  };
+
+  const confirmHidden = () => {
+    if (selectedActor) {
+      console.log('Hiding Actor ID:', selectedActor.id);  // Ensure the correct ID is used
+      dispatch(hiddenActor(selectedActor.id));
+      onAlertClose();
+      dispatch(fetchActors());
+    }
   };
 
   const columnsWithActions = useMemo(
@@ -79,13 +105,14 @@ export default function Theaters(props) {
         Cell: ({ row }) => (
           <div>
             <Button
-              className="mr-2 text-blue-500 hover:text-blue-700"
+              colorScheme="blue"
+              mr={2}
               onClick={() => handleEdit(row)}
             >
               Edit
             </Button>
             <Button
-              className="text-red-500 hover:text-red-700"
+              colorScheme="red"
               onClick={() => handleHidden(row)}
             >
               Hide
@@ -101,7 +128,7 @@ export default function Theaters(props) {
     {
       columns: columnsWithActions,
       data,
-      initialState: { pageIndex: 0, pageSize: 5 }, // Thiết lập trang đầu tiên và kích thước trang
+      initialState: { pageIndex: 0, pageSize: 5 },
     },
     useGlobalFilter,
     useSortBy,
@@ -137,20 +164,20 @@ export default function Theaters(props) {
             fontWeight="700"
             lineHeight="100%"
           >
-            Theaters
+            Actors
           </Text>
-          <Menu></Menu>
+          <ActorMenu />
         </Flex>
         <Flex mb="20px" px="25px" justify="space-between" align="center">
           <Select
-            placeholder="Filter by country"
+            placeholder="Filter by movie"
             value={filterInput}
             onChange={(e) => setFilterInput(e.target.value)}
             maxW="300px"
           >
-            {country.map((coun) => (
-              <option key={coun} value={coun}>
-                {coun}
+            {titleMovie.map((movie) => (
+              <option key={movie.id} value={movie.id}>
+                {movie.title}
               </option>
             ))}
           </Select>
@@ -206,7 +233,6 @@ export default function Theaters(props) {
               </Tbody>
             </Table>
 
-            {/* Điều khiển phân trang */}
             <Flex justifyContent="center" alignItems="center" mt="4">
               <div className="flex space-x-2">
                 {pageOptions.map((pageNumber) => (
@@ -228,12 +254,37 @@ export default function Theaters(props) {
         )}
       </Card>
 
-      {selectedMovie && (
-        <EditTheater
+      {/* Modal Alert */}
+      <Modal isOpen={isAlertOpen} onClose={onAlertClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader fontSize="lg" fontWeight="bold">
+            Confirm Hide Actor
+          </ModalHeader>
+          <ModalBody>
+            <Text fontSize="md">
+              Are you sure you want to hide the actor "
+              <Text as="span" fontWeight="bold">
+                {selectedActor?.name}
+              </Text>
+              "? This action cannot be undone.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" onClick={confirmHidden} mr={3}>
+              Hide
+            </Button>
+            <Button onClick={onAlertClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {selectedActor && (
+        <EditActorForm
           isOpen={isOpen}
           onClose={onClose}
-          movieId={selectedMovie.id}
-          fetchMovies={fetchMovies}
+          actorId={selectedActor.id}
+          fetchActors={fetchActors}
         />
       )}
     </>

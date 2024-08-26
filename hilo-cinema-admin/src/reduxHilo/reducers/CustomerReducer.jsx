@@ -3,21 +3,44 @@ const initialState = {
   customers: [],
   count: 0,
   error: null,
-  searchResults: [], // Thêm state để lưu kết quả tìm kiếm
+  emailExists: false,
+  searchResults: [],
 };
 
 const customerReducer = (state = initialState, action) => {
   switch (action.type) {
     case "FETCH_CUSTOMERS_REQUEST":
+    case "CHECK_EMAIL_EXISTS_REQUEST":
       return {
         ...state,
         loading: true,
+        error: null,
+      };
+    case "CHECK_EMAIL_EXISTS_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        emailExists: action.payload,
       };
     case "FETCH_CUSTOMERS_SUCCESS":
       return {
         ...state,
         loading: false,
         customers: action.payload,
+      };
+    case "ADD_CUSTOMER_SUCCESS":
+      if (!action.payload || !action.payload.id) {
+        console.error("Invalid payload for ADD_CUSTOMER_SUCCESS:", action.payload);
+        return state;
+      }
+      return {
+        ...state,
+        customers: [...state.customers, action.payload],
+      };
+    case "ADD_CUSTOMER_FAILURE":
+      return {
+        ...state,
+        error: action.payload,
       };
     case "SEARCH_CUSTOMERS_SUCCESS":
       return {
@@ -28,13 +51,33 @@ const customerReducer = (state = initialState, action) => {
     case "CLEAR_SEARCH_RESULTS":
       return {
         ...state,
-        searchResults: [], // Clear searchResults
+        searchResults: [],
       };
     case "FETCH_CUSTOMERS_FAILURE":
     case "SEARCH_CUSTOMERS_FAILURE":
+    case "CHECK_EMAIL_EXISTS_FAILURE":
       return {
         ...state,
         loading: false,
+        error: action.payload,
+      };
+    case "EDIT_CUSTOMER_SUCCESS":
+      if (!action.payload || !action.payload.id) {
+        console.error("Invalid payload for EDIT_CUSTOMER_SUCCESS:", action.payload);
+        return {
+          ...state,
+          error: "Invalid payload for customer update",
+        };
+      }
+      return {
+        ...state,
+        customers: state.customers.map(cus =>
+          cus.id === action.payload.id ? action.payload : cus
+        ),
+      };
+    case "EDIT_CUSTOMER_FAILURE":
+      return {
+        ...state,
         error: action.payload,
       };
     case "FETCH_CUSTOMERS_COUNT_SUCCESS":
@@ -53,17 +96,19 @@ const customerReducer = (state = initialState, action) => {
         loading: true,
       };
     case "HIDE_CUSTOMER_SUCCESS":
+      if (!action.payload || !action.payload.id) {
+        console.error("Invalid payload for HIDE_CUSTOMER_SUCCESS:", action.payload);
+        return state;
+      }
       return {
         ...state,
-        loading: false,
-        customers: state.customers.map((customer) =>
-          customer.id === action.payload ? { ...customer, status: "Inactive" } : customer
+        customers: state.customers.map(customer =>
+          customer.id === action.payload.id ? action.payload : customer
         ),
       };
     case "HIDE_CUSTOMER_FAILURE":
       return {
         ...state,
-        loading: false,
         error: action.payload,
       };
     default:

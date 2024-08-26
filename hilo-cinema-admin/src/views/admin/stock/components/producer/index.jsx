@@ -2,10 +2,10 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
 import {
   columnsDataDevelopment,
-} from "views/admin/stock/components/movie/variables/columnsData";
-import tableDataDevelopment from "views/admin/stock/components/movie/variables/tableDataDevelopment.json";
+} from "views/admin/stock/components/actor/variables/columnsData";
+import tableDataDevelopment from "views/admin/stock/components/actor/variables/tableDataDevelopment.json";
 import React from "react";
-import Theaters from "./components/Theaters";
+import Actors from "./components/Producers";
 
 export default function UserManagement() {
   // Chakra Color Mode
@@ -15,7 +15,8 @@ export default function UserManagement() {
         mb='20px'
         columns={{ sm: 1, md: 1 }}
         spacing={{ base: "20px", xl: "20px" }}>
-        <Theaters
+        {/* <TrendingMovie></TrendingMovie> */}
+        <Actors
           columnsData={columnsDataDevelopment}
           tableData={tableDataDevelopment}
         />

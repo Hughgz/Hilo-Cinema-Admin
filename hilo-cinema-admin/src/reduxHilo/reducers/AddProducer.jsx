@@ -24,7 +24,7 @@ import { addActor, fetchActors } from "reduxHilo/actions/actorAction"; // Action
 import ModalAlert from "components/alert/modalAlert";
 import { fetchMovies } from "reduxHilo/actions/movieAction";
 
-const AddActorForm = ({ isOpen, onClose }) => {
+const AddProducerForm = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
     const { movies } = useSelector((state) => state.movie);
     const [formData, setFormData] = useState({
@@ -205,9 +205,9 @@ const AddActorForm = ({ isOpen, onClose }) => {
     );
 };
 
-AddActorForm.propTypes = {
+AddProducerForm.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
 };
 
-export default AddActorForm;
+export default AddProducerForm;

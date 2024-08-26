@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import ModalAlert from "components/alert/modalAlert";
 
 const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
   const dispatch = useDispatch();
@@ -49,6 +50,9 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
   const [currentImgSmall, setCurrentImgSmall] = useState(null);
   const [currentImgLarge, setCurrentImgLarge] = useState(null);
 
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success");
   useEffect(() => {
     if (movie) {
       setFormData({ ...movie });
@@ -158,13 +162,24 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
         });
 
         await dispatch(editMovie(movieId, formDataToSend));  // Sử dụng FormData để gửi dữ liệu
-        alert("Cập nhật phim thành công");
+
+        setAlertMessage("Movie updated successfully");
+        setAlertType("success");
+        setShowAlert(true);
+
         onClose(); // Đóng modal sau khi cập nhật thành công
-        fetchMovies(); // Làm mới danh sách phim
+        dispatch(fetchMovies()); // Làm mới danh sách phim
       } catch (error) {
         console.error("Error updating movie:", error.response ? error.response.data : error.message);
+        setAlertMessage("Failed to update the movie. Please try again.");
+        setAlertType("error");
+        setShowAlert(true);
       }
     }
+  };
+
+  const handleCloseAlert = () => {
+    setShowAlert(false);
   };
 
   const formBackgroundColor = useColorModeValue("white", "gray.700");
@@ -172,232 +187,241 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
   const textColor = useColorModeValue("black", "white");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Edit Movie</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={4}>
-              <FormControl id="title" isInvalid={errors.title}>
-                <FormLabel color={textColor}>Title</FormLabel>
-                <Input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="duration" isInvalid={errors.duration}>
-                <FormLabel color={textColor}>Duration (minutes)</FormLabel>
-                <Input
-                  type="number"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.duration && <FormErrorMessage>{errors.duration}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="releasedDate" isInvalid={errors.releasedDate}>
-                <FormLabel color={textColor}>Released Date</FormLabel>
-                <Input
-                  type="date"
-                  name="releasedDate"
-                  value={formData.releasedDate}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.releasedDate && <FormErrorMessage>{errors.releasedDate}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="rate" isInvalid={errors.rate}>
-                <FormLabel color={textColor}>Rate</FormLabel>
-                <Input
-                  type="number"
-                  name="rate"
-                  value={formData.rate}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  max="10"
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.rate && <FormErrorMessage>{errors.rate}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="country" isInvalid={errors.country}>
-                <FormLabel color={textColor}>Country</FormLabel>
-                <Select
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                >
-                  {countries.map((country) => (
-                    <option key={country.value} value={country.value}>
-                      {country.label}
-                    </option>
-                  ))}
-                </Select>
-                {errors.country && <FormErrorMessage>{errors.country}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="director" isInvalid={errors.director}>
-                <FormLabel color={textColor}>Director</FormLabel>
-                <Input
-                  type="text"
-                  name="director"
-                  value={formData.director}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.director && <FormErrorMessage>{errors.director}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="description" isInvalid={errors.description}>
-                <FormLabel color={textColor}>Description</FormLabel>
-                <Textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.description && <FormErrorMessage>{errors.description}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="movieType" isInvalid={errors.movieType}>
-                <FormLabel color={textColor}>Movie Type</FormLabel>
-                <Select
-                  name="movieType"
-                  value={formData.movieType}
-                  onChange={handleChange}
-                >
-                  <option value="action">Action</option>
-                  <option value="adventure">Adventure</option>
-                  <option value="comedy">Comedy</option>
-                  <option value="drama">Drama</option>
-                  <option value="horror">Horror</option>
-                  <option value="romance">Romance</option>
-                  <option value="sci-fi">Science Fiction (Sci-Fi)</option>
-                  <option value="fantasy">Fantasy</option>
-                  <option value="thriller">Thriller</option>
-                  <option value="mystery">Mystery</option>
-                  <option value="documentary">Documentary</option>
-                  <option value="animation">Animation</option>
-                  <option value="musical">Musical</option>
-                  <option value="crime">Crime</option>
-                  <option value="biography">Biography (Biopic)</option>
-                  <option value="historical">Historical</option>
-                  <option value="war">War</option>
-                  <option value="western">Western</option>
-                  <option value="family">Family</option>
-                  <option value="sport">Sport</option>
-                  <option value="superhero">Superhero</option>
-                </Select>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Movie</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={4}>
+                <FormControl id="title" isInvalid={errors.title}>
+                  <FormLabel color={textColor}>Title</FormLabel>
+                  <Input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.title && <FormErrorMessage>{errors.title}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="duration" isInvalid={errors.duration}>
+                  <FormLabel color={textColor}>Duration (minutes)</FormLabel>
+                  <Input
+                    type="number"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.duration && <FormErrorMessage>{errors.duration}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="releasedDate" isInvalid={errors.releasedDate}>
+                  <FormLabel color={textColor}>Released Date</FormLabel>
+                  <Input
+                    type="date"
+                    name="releasedDate"
+                    value={formData.releasedDate}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.releasedDate && <FormErrorMessage>{errors.releasedDate}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="rate" isInvalid={errors.rate}>
+                  <FormLabel color={textColor}>Rate</FormLabel>
+                  <Input
+                    type="number"
+                    name="rate"
+                    value={formData.rate}
+                    onChange={handleChange}
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.rate && <FormErrorMessage>{errors.rate}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="country" isInvalid={errors.country}>
+                  <FormLabel color={textColor}>Country</FormLabel>
+                  <Select
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                  >
+                    {countries.map((country) => (
+                      <option key={country.value} value={country.value}>
+                        {country.label}
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.country && <FormErrorMessage>{errors.country}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="director" isInvalid={errors.director}>
+                  <FormLabel color={textColor}>Director</FormLabel>
+                  <Input
+                    type="text"
+                    name="director"
+                    value={formData.director}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.director && <FormErrorMessage>{errors.director}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="description" isInvalid={errors.description}>
+                  <FormLabel color={textColor}>Description</FormLabel>
+                  <Textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.description && <FormErrorMessage>{errors.description}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="movieType" isInvalid={errors.movieType}>
+                  <FormLabel color={textColor}>Movie Type</FormLabel>
+                  <Select
+                    name="movieType"
+                    value={formData.movieType}
+                    onChange={handleChange}
+                  >
+                    <option value="action">Action</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="comedy">Comedy</option>
+                    <option value="drama">Drama</option>
+                    <option value="horror">Horror</option>
+                    <option value="romance">Romance</option>
+                    <option value="sci-fi">Science Fiction (Sci-Fi)</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="thriller">Thriller</option>
+                    <option value="mystery">Mystery</option>
+                    <option value="documentary">Documentary</option>
+                    <option value="animation">Animation</option>
+                    <option value="musical">Musical</option>
+                    <option value="crime">Crime</option>
+                    <option value="biography">Biography (Biopic)</option>
+                    <option value="historical">Historical</option>
+                    <option value="war">War</option>
+                    <option value="western">Western</option>
+                    <option value="family">Family</option>
+                    <option value="sport">Sport</option>
+                    <option value="superhero">Superhero</option>
+                  </Select>
 
-                {errors.movieType && <FormErrorMessage>{errors.movieType}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="trailer" isInvalid={errors.trailer}>
-                <FormLabel color={textColor}>Trailer URL</FormLabel>
-                <Input
-                  type="url"
-                  name="trailer"
-                  value={formData.trailer}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.trailer && <FormErrorMessage>{errors.trailer}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="movieUrl" isInvalid={errors.movieUrl}>
-                <FormLabel color={textColor}>Movie URL</FormLabel>
-                <Input
-                  type="text"
-                  name="movieUrl"
-                  value={formData.movieUrl}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                  _placeholder={{ color: "gray.500" }}
-                />
-                {errors.movieUrl && <FormErrorMessage>{errors.movieUrl}</FormErrorMessage>}
-              </FormControl>
-              <FormControl id="imgSmall">
-                <FormLabel color={textColor}>Small Image</FormLabel>
-                {currentImgSmall && <img src={currentImgSmall} alt="Current Small Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
-                <Input
-                  type="file"
-                  name="imgSmall"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                />
-              </FormControl>
-              <FormControl id="imgLarge">
-                <FormLabel color={textColor}>Large Image</FormLabel>
-                {currentImgLarge && <img src={currentImgLarge} alt="Current Large Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
-                <Input
-                  type="file"
-                  name="imgLarge"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                />
-              </FormControl>
-              <FormControl id="status" isInvalid={errors.status}>
-                <FormLabel color={textColor}>Status</FormLabel>
-                <Select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  bg={inputBackgroundColor}
-                  border={0}
-                  color={textColor}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </Select>
-                {errors.status && <FormErrorMessage>{errors.status}</FormErrorMessage>}
-              </FormControl>
-            </Stack>
-          </form>
-        </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSubmit}>
-            Save
-          </Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+                  {errors.movieType && <FormErrorMessage>{errors.movieType}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="trailer" isInvalid={errors.trailer}>
+                  <FormLabel color={textColor}>Trailer URL</FormLabel>
+                  <Input
+                    type="url"
+                    name="trailer"
+                    value={formData.trailer}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.trailer && <FormErrorMessage>{errors.trailer}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="movieUrl" isInvalid={errors.movieUrl}>
+                  <FormLabel color={textColor}>Movie URL</FormLabel>
+                  <Input
+                    type="text"
+                    name="movieUrl"
+                    value={formData.movieUrl}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                    _placeholder={{ color: "gray.500" }}
+                  />
+                  {errors.movieUrl && <FormErrorMessage>{errors.movieUrl}</FormErrorMessage>}
+                </FormControl>
+                <FormControl id="imgSmall">
+                  <FormLabel color={textColor}>Small Image</FormLabel>
+                  {currentImgSmall && <img src={currentImgSmall} alt="Current Small Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
+                  <Input
+                    type="file"
+                    name="imgSmall"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                  />
+                </FormControl>
+                <FormControl id="imgLarge">
+                  <FormLabel color={textColor}>Large Image</FormLabel>
+                  {currentImgLarge && <img src={currentImgLarge} alt="Current Large Image" style={{ marginBottom: '10px', maxWidth: '200px' }} />}
+                  <Input
+                    type="file"
+                    name="imgLarge"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                  />
+                </FormControl>
+                <FormControl id="status" isInvalid={errors.status}>
+                  <FormLabel color={textColor}>Status</FormLabel>
+                  <Select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    bg={inputBackgroundColor}
+                    border={0}
+                    color={textColor}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </Select>
+                  {errors.status && <FormErrorMessage>{errors.status}</FormErrorMessage>}
+                </FormControl>
+              </Stack>
+            </form>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={handleSubmit}>
+              Save
+            </Button>
+            <Button onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <ModalAlert
+        isVisible={showAlert}
+        message={alertMessage}
+        type={alertType}
+        onClose={handleCloseAlert}
+      />
+    </>
   );
 };
+
 
 EditMovieForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,

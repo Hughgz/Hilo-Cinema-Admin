@@ -23,7 +23,7 @@ import {
 import PropTypes from "prop-types";
 import ModalAlert from "components/alert/modalAlert";
 
-const EditActorForm = ({ isOpen, onClose, actorId, fetchActors }) => {
+const EditProducerForm = ({ isOpen, onClose, actorId, fetchActors }) => {
   const dispatch = useDispatch();
   const actor = useSelector((state) =>
     state.actor.actors.find((a) => a.id === actorId)
@@ -254,10 +254,10 @@ const EditActorForm = ({ isOpen, onClose, actorId, fetchActors }) => {
   );
 };
 
-EditActorForm.propTypes = {
+EditProducerForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   actorId: PropTypes.number.isRequired,
 };
 
-export default EditActorForm;
+export default EditProducerForm;

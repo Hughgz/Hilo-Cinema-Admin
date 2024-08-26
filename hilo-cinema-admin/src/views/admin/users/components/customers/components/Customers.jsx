@@ -25,6 +25,7 @@ import Card from "components/card/Card";
 import EditCustomerForm from "./EditCustomer";
 import CustomerMenu from "components/menu/CustomerMenu";
 import { hideCustomer } from "reduxHilo/actions/customerAction";
+import ModalAlert from "components/alert/modalAlert";
 
 export default function CustomerList(props) {
   const { columnsData } = props;
@@ -37,6 +38,10 @@ export default function CustomerList(props) {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [filterInput, setFilterInput] = useState("");
 
+   // State for ModalAlert
+   const [modalVisible, setModalVisible] = useState(false);
+   const [modalMessage, setModalMessage] = useState("");
+   const [modalType, setModalType] = useState("success");
   useEffect(() => {
     dispatch(fetchCustomers());
   }, [dispatch]);
@@ -68,8 +73,30 @@ export default function CustomerList(props) {
   };
 
   const handleHide = (row) => {
-    console.log(row.original.id)
-    dispatch(hideCustomer(row.original.id));
+    const customerId = row?.original?.id;
+    if (!customerId) {
+      console.error("ID is undefined.");
+      return;
+    }
+  
+    dispatch(hideCustomer(customerId))
+      .then(() => {
+        setModalMessage("Customer has been successfully hidden.");
+        setModalType("success");
+        setModalVisible(true);
+  
+        // Reload the customers list after successful update
+        dispatch(fetchCustomers()).then(() => {
+          // Ensure that selectedCustomer is cleared if it no longer exists
+          setSelectedCustomer(null);
+        });
+      })
+      .catch((error) => {
+        setModalMessage("Failed to hide customer. Please try again.");
+        setModalType("error");
+        setModalVisible(true);
+        console.error("Failed to update customer status:", error);
+      });
   };
 
   const columnsWithActions = useMemo(
@@ -233,6 +260,12 @@ export default function CustomerList(props) {
           customerId={selectedCustomer.id}
         />
       )}
+      <ModalAlert
+        message={modalMessage}
+        type={modalType}
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </>
   );
 }
