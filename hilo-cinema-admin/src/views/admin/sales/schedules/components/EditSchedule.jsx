@@ -23,7 +23,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import ModalAlert from "components/alert/modalAlert";
 
-const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
+const EditScheduleForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
   const dispatch = useDispatch();
   const movie = useSelector((state) =>
     state.movie.movies.find((m) => m.id === movieId)
@@ -423,11 +423,11 @@ const EditMovieForm = ({ isOpen, onClose, movieId, fetchMovies }) => {
 };
 
 
-EditMovieForm.propTypes = {
+EditScheduleForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   movieId: PropTypes.string.isRequired,
   fetchMovies: PropTypes.func.isRequired,
 };
 
-export default EditMovieForm;
+export default EditScheduleForm;

@@ -4,7 +4,11 @@ import {
     FETCH_SCHEDULES_FAILURE,
     FETCH_SCHEDULES_BY_MOVIEID_REQUEST,
     FETCH_SCHEDULES_BY_MOVIEID_SUCCESS,
-    FETCH_SCHEDULES_BY_MOVIEID_FAILURE,CLEAR_SCHEDULES
+    FETCH_SCHEDULES_BY_MOVIEID_FAILURE,
+    FETCH_SEATS_BY_SCHEDULE_REQUEST,
+    FETCH_SEATS_BY_SCHEDULE_SUCCESS,
+    FETCH_SEATS_BY_SCHEDULE_FAILURE,
+    CLEAR_SCHEDULES
 } from "../types/type";
 
 export const fetchSchedulesRequest = () => ({
@@ -106,3 +110,56 @@ export const fetchSchedulesByMovieId = (movieId) => {
 export const clearSchedules = () => ({
     type: CLEAR_SCHEDULES
 });
+
+//GetSeatByScheudle
+export const fetchSeatsByScheduleRequest = () => ({
+    type: FETCH_SEATS_BY_SCHEDULE_REQUEST,
+});
+
+export const fetchSeatsByScheduleSuccess = (seats) => ({
+    type: FETCH_SEATS_BY_SCHEDULE_SUCCESS,
+    payload: seats,
+});
+
+export const fetchSeatsByScheduleFailure = (error) => ({
+    type: FETCH_SEATS_BY_SCHEDULE_FAILURE,
+    payload: error.message || error.toString(),
+});
+
+export const fetchSeatsBySchedule = (movieId, date, theaterId, roomId, time) => {
+    return (dispatch, getState) => {
+        const state = getState();
+        const token = state.auth.token;
+        const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
+        dispatch(fetchSeatsByScheduleRequest());
+
+        return axios.get(`http://localhost:8000/ScheduleService/getSeatsBySchedule`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Site-Type': sysRole || 'default',
+                'Content-Type': 'application/json'
+            },
+            params: {
+                movieId,
+                date,
+                theaterId,
+                roomId,
+                time,
+            }
+        })
+            .then(response => {
+                dispatch(fetchSeatsByScheduleSuccess(response.data));
+            })
+            .catch(error => {
+                console.error("There was an error fetching seats by schedule!", error.message);
+                if (error.response && error.response.status === 401) {
+                    dispatch(fetchSeatsByScheduleFailure("Unauthorized access"));
+                } else if (error.response && error.response.status === 403) {
+                    dispatch(fetchSeatsByScheduleFailure("Forbidden access"));
+                } else {
+                    dispatch(fetchSeatsByScheduleFailure(error));
+                }
+            });
+    };
+};

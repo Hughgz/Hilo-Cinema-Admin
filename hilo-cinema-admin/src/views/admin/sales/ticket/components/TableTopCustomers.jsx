@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchCustomers, searchCustomers } from 'reduxHilo/actions/customerAction'; // Import các actions cần thiết
 import ModalAlert from 'components/alert/modalAlert';
 
-const TopCustomerTable = ({ customers, loading, error }) => {
+const TopCustomerTable = ({ customers, loading, error, onSelectCustomer }) => {
   const dispatch = useDispatch();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
 
@@ -59,7 +59,9 @@ const TopCustomerTable = ({ customers, loading, error }) => {
 
   const handleSelectCustomer = (customer) => {
     setSelectedCustomer(customer);
-    console.log('Selected Customer:', customer);
+    if (onSelectCustomer) {
+      onSelectCustomer(customer.id); // Gọi callback với customerId
+    }
   };
 
   useEffect(() => {

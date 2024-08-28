@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchFoods, searchFoodByName } from 'reduxHilo/actions/foodAction'; 
 import ModalAlert from 'components/alert/modalAlert';
 
-const TopFoodTable = ({ foods, loading, error }) => {
+const TopFoodTable = ({ foods, loading, error, onSelectFood }) => {
   const dispatch = useDispatch();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
 
@@ -31,7 +31,10 @@ const TopFoodTable = ({ foods, loading, error }) => {
   const foodsPerPage = 3;
   const [showTable, setShowTable] = useState(false);
 
-  const searchResults = useSelector((state) => state.food?.searchResults); // Sử dụng optional chaining
+  // Trạng thái lưu trữ số lượng của từng món ăn
+  const [quantities, setQuantities] = useState({});
+
+  const searchResults = useSelector((state) => state.food?.searchResults);
 
   const handleSearch = () => {
     if (!searchValue.trim()) {
@@ -51,7 +54,6 @@ const TopFoodTable = ({ foods, loading, error }) => {
 
   const handleReset = () => {
     setSearchValue('');
-    // dispatch(clearSearchResults()); // You might need an action to clear food search results
     dispatch(fetchFoods()); 
     setIsExpanded(false);
     setCurrentPage(1);
@@ -59,8 +61,26 @@ const TopFoodTable = ({ foods, loading, error }) => {
   };
 
   const handleSelectFood = (food) => {
-    setSelectedFood(food);
-    console.log('Selected Food:', food);
+    const quantity = quantities[food.id] || 1;
+    console.log(`Selected food with ID ${food.id} has quantity:`, quantity);
+    
+    setSelectedFood({ ...food, quantity });
+    
+    if (onSelectFood) {
+      onSelectFood(food.id, quantity);
+    }
+  };
+
+  // Hàm xử lý khi thay đổi số lượng
+  const handleQuantityChange = (foodId, change) => {
+    setQuantities((prevQuantities) => {
+      const newQuantity = Math.max(1, (prevQuantities[foodId] || 1) + change);
+      console.log(`Updating quantity for foodId ${foodId}:`, newQuantity);
+      return {
+        ...prevQuantities,
+        [foodId]: newQuantity,
+      };
+    });
   };
 
   useEffect(() => {
@@ -77,7 +97,7 @@ const TopFoodTable = ({ foods, loading, error }) => {
 
   const indexOfLastFood = currentPage * foodsPerPage;
   const indexOfFirstFood = indexOfLastFood - foodsPerPage;
-  const currentFoods = (searchResults?.length > 0 ? searchResults : foods ?? []).slice(indexOfFirstFood, indexOfLastFood); 
+  const currentFoods = (searchResults?.length > 0 ? searchResults : foods ?? []).slice(indexOfFirstFood, indexOfLastFood);
 
   return (
     <Flex direction="column" w="100%" overflowX={{ sm: 'scroll', lg: 'hidden' }}>
@@ -107,24 +127,33 @@ const TopFoodTable = ({ foods, loading, error }) => {
               <Table variant="simple" color="gray.500" mt="12px">
                 <Thead color={textColor}>
                   <Tr>
-                    <Th>Image</Th> 
+                    <Th></Th>
                     <Th>Name</Th>
-                    <Th>Price</Th> 
+                    <Th>Price</Th>
+                    <Th>Quantity</Th>
+                    <Th></Th> {/* Thêm một cột để chứa nút Select */}
                   </Tr>
                 </Thead>
                 <Tbody color={textColor}>
                   {currentFoods.map((food) => (
                     <Tr key={food.id}>
                       <Td>
-                        {food.imgBase64 && ( 
-                          <img src={`data:image/jpeg;base64,${food.imgBase64}`} alt={food.name} style={{ maxWidth: '50px' }} /> 
+                        {food.imgBase64 && (
+                          <img src={`data:image/jpeg;base64,${food.imgBase64}`} alt={food.name} style={{ maxWidth: '50px' }} />
                         )}
                       </Td>
                       <Td>{food.name}</Td>
-                      <Td>{food.price}</Td> 
+                      <Td>{food.price}</Td>
+                      <Td>
+                        <Flex align="center">
+                          <Button size="sm" onClick={() => handleQuantityChange(food.id, -1)}>-</Button>
+                          <Text mx={2}>{quantities[food.id] || 1}</Text>
+                          <Button size="sm" onClick={() => handleQuantityChange(food.id, 1)}>+</Button>
+                        </Flex>
+                      </Td>
                       <Td>
                         <Button
-                          onClick={() => handleSelectFood(food)} 
+                          onClick={() => handleSelectFood(food)}
                           colorScheme="blue"
                           size="sm"
                         >

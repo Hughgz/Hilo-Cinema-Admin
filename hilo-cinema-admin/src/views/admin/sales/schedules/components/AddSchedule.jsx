@@ -23,7 +23,7 @@ import PropTypes from "prop-types";
 import { addMovie, fetchMovies } from "reduxHilo/actions/movieAction";
 import ModalAlert from "components/alert/modalAlert";
 
-const CreateMovieModal = ({ isOpen, onClose }) => {
+const AddScheduleForm = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -377,9 +377,9 @@ const CreateMovieModal = ({ isOpen, onClose }) => {
     );
 };
 
-CreateMovieModal.propTypes = {
+AddScheduleForm.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
 };
 
-export default CreateMovieModal;
+export default AddScheduleForm;

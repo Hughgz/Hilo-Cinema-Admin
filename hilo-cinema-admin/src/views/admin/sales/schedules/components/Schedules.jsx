@@ -26,17 +26,17 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { fetchMovies, hiddenMovie } from "reduxHilo/actions/movieAction";
+import { fetchSchedules } from "reduxHilo/actions/scheduleAction";
 import Card from "components/card/Card";
-import Menu from "components/menu/MovieMenu";
-import EditMovieForm from "./EditMovieModal";
+import Menu from "components/menu/ScheduleMenu"; // Cập nhật nếu có Menu riêng cho Schedule
+import EditScheduleForm from "./EditSchedule"; // Cập nhật nếu có Modal riêng cho Schedule
 
-export default function Movies(props) {
+export default function Schedules(props) {
   const { columnsData } = props;
   const columns = useMemo(() => columnsData, [columnsData]);
 
   const dispatch = useDispatch();
-  const { loading, movies, error } = useSelector((state) => state.movie);
+  const { loading, schedules, error } = useSelector((state) => state.schedule);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -45,49 +45,49 @@ export default function Movies(props) {
     onClose: onAlertClose,
   } = useDisclosure();
 
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [filterInput, setFilterInput] = useState("");
 
   useEffect(() => {
-    dispatch(fetchMovies());
+    dispatch(fetchSchedules());
   }, [dispatch]);
 
   const country = useMemo(() => {
     const countrySet = new Set();
-    movies.forEach((movie) => {
-      if (movie.country) {
-        countrySet.add(movie.country);
+    schedules.forEach((schedule) => {
+      if (schedule.country) {
+        countrySet.add(schedule.country);
       }
     });
     return Array.from(countrySet);
-  }, [movies]);
+  }, [schedules]);
 
   const data = useMemo(() => {
-    return movies
-      .filter((movie) => movie.status !== "Inactive")
-      .filter((movie) =>
+    return schedules
+      .filter((schedule) => schedule.status !== "Inactive")
+      .filter((schedule) =>
         filterInput
-          ? movie.country &&
-            movie.country.toLowerCase().includes(filterInput.toLowerCase())
+          ? schedule.country &&
+            schedule.country.toLowerCase().includes(filterInput.toLowerCase())
           : true
       );
-  }, [movies, filterInput]);
+  }, [schedules, filterInput]);
 
   const handleEdit = (row) => {
-    setSelectedMovie(row.original);
+    setSelectedSchedule(row.original);
     onOpen();
   };
 
   const handleHidden = (row) => {
-    setSelectedMovie(row.original);
+    setSelectedSchedule(row.original);
     onAlertOpen(); // Mở modal xác nhận
   };
 
-  const confirmHidden = () => {
-    dispatch(hiddenMovie(selectedMovie.id));
-    onAlertClose(); // Đóng modal sau khi ẩn phim
-    dispatch(fetchMovies());
-  };
+  // const confirmHidden = () => {
+  //   dispatch(hiddenSchedule(selectedSchedule.id));
+  //   onAlertClose(); // Đóng modal sau khi ẩn lịch chiếu
+  //   dispatch(fetchSchedules());
+  // };
 
   const columnsWithActions = useMemo(
     () => [
@@ -157,7 +157,7 @@ export default function Movies(props) {
             fontWeight="700"
             lineHeight="100%"
           >
-            Movies
+            Schedules
           </Text>
           <Menu></Menu>
         </Flex>
@@ -252,19 +252,19 @@ export default function Movies(props) {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader fontSize="lg" fontWeight="bold">
-            Confirm Hide Movie
+            Confirm Hide Schedule
           </ModalHeader>
           <ModalBody>
             <Text fontSize="md">
-              Are you sure you want to hide the movie "
+              Are you sure you want to hide the schedule for "
               <Text as="span" fontWeight="bold">
-                {selectedMovie?.title}
+                {selectedSchedule?.title}
               </Text>
               "? This action cannot be undone.
             </Text>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" onClick={confirmHidden} mr={3}>
+            <Button colorScheme="red" onClick={() => "Hello"} mr={3}>
               Hide
             </Button>
             <Button onClick={onAlertClose}>Cancel</Button>
@@ -272,12 +272,12 @@ export default function Movies(props) {
         </ModalContent>
       </Modal>
 
-      {selectedMovie && (
-        <EditMovieForm
+      {selectedSchedule && (
+        <EditScheduleForm
           isOpen={isOpen}
           onClose={onClose}
-          movieId={selectedMovie.id}
-          fetchMovies={fetchMovies}
+          scheduleId={selectedSchedule.id}
+          fetchSchedules={fetchSchedules}
         />
       )}
     </>

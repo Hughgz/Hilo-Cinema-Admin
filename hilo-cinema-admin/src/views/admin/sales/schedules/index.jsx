@@ -5,7 +5,7 @@ import {
 } from "views/admin/stock/components/movie/variables/columnsData";
 import tableDataDevelopment from "views/admin/stock/components/movie/variables/tableDataDevelopment.json";
 import React from "react";
-import Movies from "./components/MovieList";
+import Movies from "./components/Schedules";
 
 export default function UserManagement() {
   // Chakra Color Mode

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectSeat, deselectSeat } from "../../../../../reduxHilo/actions/bookingAction";
 import { fetchSeatsByRoom } from "../../../../../reduxHilo/actions/seatAction";
 import { useColorModeValue } from "@chakra-ui/system";
+import { Button } from "@chakra-ui/react";
 
 export default function SeatList({ roomId, rowNum, colNum }) {
   const dispatch = useDispatch();
@@ -19,21 +20,19 @@ export default function SeatList({ roomId, rowNum, colNum }) {
   const textColor = useColorModeValue("black", "white");
 
   const handleSeatClick = (seat) => {
-    // Kiểm tra trạng thái ghế trước khi xử lý
     if (seat.status === "Inactive") {
-      return; // Không làm gì nếu ghế không hoạt động
+      return; // Do nothing if seat is inactive
     }
 
-    console.log(`Seat selected: ${seat.id}`);
     if (isSelected(seat)) {
-      dispatch(deselectSeat(seat.id)); 
+      dispatch(deselectSeat(seat.id));
     } else {
-      dispatch(selectSeat(seat.id)); 
+      dispatch(selectSeat(seat));
     }
   };
 
   const isSelected = (seat) => {
-    return selectedSeats.some((seatId) => seatId === seat.id);
+    return selectedSeats.some(selectedSeat => selectedSeat.id === seat.id);
   };
 
   if (loading) {
@@ -117,9 +116,9 @@ export default function SeatList({ roomId, rowNum, colNum }) {
                       let seatClass =
                         "border-gray-400 hover:bg-green-100 hover:border-green-500";
                       if (isInactive && !isSeatSelected) {
-                        seatClass = "bg-gray-300 border-gray-300"; 
+                        seatClass = "bg-gray-300 border-gray-300";
                       } else if (isSeatSelected) {
-                        seatClass = "bg-green-500 border-green-500"; 
+                        seatClass = "bg-green-500 border-green-500";
                       } else if (seat.type === "vip") {
                         seatClass = "bg-red-500 border-red-500";
                       } else if (seat.type === "couple") {
@@ -131,12 +130,12 @@ export default function SeatList({ roomId, rowNum, colNum }) {
                           key={colIndex}
                           className={`md:h-8 h-6 border rounded md:text-s text-[10px] transition duration-300 ease-in-out ${seatClass} md:w-8 w-6 shadow-sm`}
                           onClick={() => handleSeatClick(seat)}
-                          disabled={isInactive} // Vô hiệu hóa nếu ghế inactive
+                          disabled={isInactive}
                         >
                           <span
                             className={`inline-block md:w-8 w-6 text-center`}
                             style={{
-                              color: textColor, 
+                              color: textColor,
                             }}
                           >
                             {seat.name || `${rowLabel}${colIndex + 1}`}
@@ -156,6 +155,32 @@ export default function SeatList({ roomId, rowNum, colNum }) {
             })}
           </ul>
         </div>
+        <Button
+          variant="outline"
+          colorScheme="gray"
+          size="sm"
+          leftIcon={
+            <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
+          }
+        >
+          Seat Hide
+        </Button>
+        <Button
+          variant="outline"
+          colorScheme="red"
+          size="sm"
+          leftIcon={<span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>}
+        >
+          Seat VIP
+        </Button>
+        <Button
+          variant="outline"
+          colorScheme="blue"
+          size="sm"
+          leftIcon={<span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>}
+        >
+          Seat couple
+        </Button>
       </div>
     </>
   );

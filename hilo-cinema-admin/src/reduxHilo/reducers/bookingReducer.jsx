@@ -1,36 +1,41 @@
-import { exampleCinemaSeat } from "views/admin/sales/ticket/variables/dataSeat.jsx";
-
+import {
+  SELECT_THEATER,
+  SELECT_MOVIE,
+  SELECT_SCHEDULE,
+  SELECT_ROOM,
+  SELECT_SEAT,
+  DESELECT_SEAT,
+  SELECT_CUSTOMER,
+  SELECT_FOOD,
+  CLEAR_BOOKING,
+} from '../types/type';
 
 const initialState = {
-  cinemaData: exampleCinemaSeat,
-  movieBooking: {
-    title: 'Example Movie',
-    type: '2D',
-    theater: 'Galaxy Phú Thọ',
-    room: 'Room 3',
-    time: '18:00',
-    date: '2024-06-30',
-  },
+  theaterId: null,
+  movieId: null,
+  scheduleId: null,
+  roomId: null,
   selectedSeats: [],
+  customerId: null,
+  foodList: [],
   totalAmount: 0,
-  foodList: [
-    { id: 1, title: 'Popcorn', description: 'Large popcorn', price: 50000, quantity: 0, image: 'https://www.simplyrecipes.com/thmb/Xzggu-Md45HKhhYSw4DK8tGlZ_I=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Perfect-Popcorn-LEAD-41-4a75a18443ae45aa96053f30a3ed0a6b.JPG' },
-    { id: 2, title: 'Coke', description: 'Large coke', price: 30000, quantity: 0, image: 'https://www.simplyrecipes.com/thmb/Xzggu-Md45HKhhYSw4DK8tGlZ_I=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Perfect-Popcorn-LEAD-41-4a75a18443ae45aa96053f30a3ed0a6b.JPG' },
-  ],
-  voucher: '',
-  paymentMethod: '',
-  stars: 0,
-  paymentMethods: [
-    // Example data; replace with your actual data
-    { value: 'creditCard', label: 'Credit Card', image: 'creditCard.jpg', checked: false },
-    { value: 'paypal', label: 'PayPal', image: 'paypal.jpg', checked: false },
-    // Add more payment methods as needed
-  ],
 };
 
 const bookingReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "SELECT_SEAT": {
+    case SELECT_THEATER:
+      return { ...state, theaterId: action.payload };
+
+    case SELECT_MOVIE:
+      return { ...state, movieId: action.payload };
+
+    case SELECT_SCHEDULE:
+      return { ...state, scheduleId: action.payload };
+
+    case SELECT_ROOM:
+      return { ...state, roomId: action.payload };
+
+    case SELECT_SEAT: {
       const seat = action.payload;
       const seatPrice = seat.type === 'VIP' ? 100000 : seat.type === 'Double' ? 150000 : 75000;
       return {
@@ -39,49 +44,58 @@ const bookingReducer = (state = initialState, action) => {
         totalAmount: state.totalAmount + seatPrice,
       };
     }
-    case "DESELECT_SEAT": {
-      const seat = action.payload;
-      const seatPrice = seat.type === 'VIP' ? 100000 : seat.type === 'Double' ? 150000 : 75000;
+
+    case DESELECT_SEAT: {
+      const seatId = action.payload;
+      const deselectedSeat = state.selectedSeats.find(seat => seat.id === seatId);
+      const seatPrice = deselectedSeat.type === 'VIP' ? 100000 : deselectedSeat.type === 'Double' ? 150000 : 75000;
       return {
         ...state,
-        selectedSeats: state.selectedSeats.filter(selectedSeat => selectedSeat.name !== seat.name),
+        selectedSeats: state.selectedSeats.filter(seat => seat.id !== seatId),
         totalAmount: state.totalAmount - seatPrice,
       };
     }
-    case 'SELECT_FOOD':
-      return {
-        ...state,
-        foodList: state.foodList.map((foodItem) =>
-          foodItem.id === action.payload.foodId
-            ? { ...foodItem, quantity: action.payload.quantity }
-            : foodItem
-        ),
-      };
-    case "SET_VOUCHER":
-      return {
-        ...state,
-        voucher: action.payload,
-      };
-    case "SET_PAYMENT_METHOD":
-      return {
-        ...state,
-        paymentMethod: action.payload,
-        paymentMethods: state.paymentMethods.map((method) =>
-          method.value === action.payload
-            ? { ...method, checked: true }
-            : { ...method, checked: false }
-        ),
-      };
-    case "SET_STARS":
-      return {
-        ...state,
-        stars: action.payload,
-      };
+
+    case SELECT_CUSTOMER:
+      return { ...state, customerId: action.payload };
+
+    case SELECT_FOOD: {
+      const { foodId, quantity } = action.payload;
+
+      const existingFoodIndex = state.foodList.findIndex(
+        (foodItem) => foodItem.foodId === foodId
+      );
+
+      if (existingFoodIndex !== -1) {
+        // Nếu food đã tồn tại, cập nhật số lượng
+        const updatedFoodList = [...state.foodList];
+        updatedFoodList[existingFoodIndex] = {
+          ...updatedFoodList[existingFoodIndex],
+          quantity, // Cập nhật quantity mới
+        };
+
+        return {
+          ...state,
+          foodList: updatedFoodList,
+        };
+      } else {
+        // Nếu food chưa tồn tại, thêm mới vào foodList
+        return {
+          ...state,
+          foodList: [
+            ...state.foodList,
+            { foodId, quantity }, // Thêm food mới với quantity
+          ],
+        };
+      }
+    }
+
+    case CLEAR_BOOKING:
+      return initialState;
+
     default:
       return state;
   }
 };
 
 export default bookingReducer;
-
-

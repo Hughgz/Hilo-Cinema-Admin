@@ -14,6 +14,7 @@ import { thunk } from "redux-thunk";
 import ForgotPassword from "views/auth/signIn/forgotPassword";
 import VerifyOTP from "views/auth/signIn/verifyOTP";
 import NewPassword from "views/auth/signIn/newPassword";
+import ConfirmPayment from "views/admin/sales/ticket/components/ConfirmPayment";
 
 const store = createStore(allReducers, applyMiddleware(thunk));
 
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path={`/forgot-password`} component={ForgotPassword} />
             <Route path={`/verify-otp`} component={VerifyOTP} />
             <Route path={`/new-password`} component={NewPassword} />
+            <Route path={`/payment-confirm`} component={ConfirmPayment} />
             <Route path={`/admin`} component={AdminLayout} />
             <Redirect from="/" to="/admin" />
           </Switch>
