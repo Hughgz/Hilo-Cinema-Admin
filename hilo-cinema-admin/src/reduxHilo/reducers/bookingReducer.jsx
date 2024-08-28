@@ -1,4 +1,5 @@
-import { exampleCinemaSeat } from "../../views/admin/sales/variables/dataSeat"
+import { exampleCinemaSeat } from "views/admin/sales/ticket/variables/dataSeat.jsx";
+
 
 const initialState = {
   cinemaData: exampleCinemaSeat,

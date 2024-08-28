@@ -31,7 +31,7 @@ export const fetchSchedules = () => {
 
         dispatch(fetchSchedulesRequest());
 
-        return axios.get("http://localhost:5003/api/Schedule", {
+        return axios.get("http://localhost:8000/ScheduleService", {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Site-Type': sysRole || 'default',
@@ -39,6 +39,7 @@ export const fetchSchedules = () => {
             }
         })
             .then(response => {
+                console.log(response.data)
                 dispatch(fetchSchedulesSuccess(response.data));
             })
             .catch(error => {
@@ -80,7 +81,7 @@ export const fetchSchedulesByMovieId = (movieId) => {
         const sysRole = state.auth.user ? state.auth.user.sysRole : null;
         dispatch(fetchSchedulesRequest());
 
-        return axios.get(`http://localhost:5003/api/Schedule/ByMovieId/${movieId}`, {
+        return axios.get(`http://localhost:8000/ScheduleService/ByMovieId/${movieId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Site-Type': sysRole || 'default',

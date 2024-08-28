@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSeatById, editSeat, fetchSeats, fetchSeatsByRoom } from "../../../../../../reduxHilo/actions/seatAction";
+import { fetchSeatById, editSeat, fetchSeats, fetchSeatsByRoom } from "../../../../../reduxHilo/actions/seatAction";
 import { useColorModeValue, Button, ModalFooter, Input, Select } from "@chakra-ui/react";
 
 export default function EditSeatForm({ seatId, onClose }) {

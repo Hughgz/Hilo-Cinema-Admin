@@ -3,7 +3,7 @@ import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import Movies from '../components/movie'
 import Theaters from '../components/theater'
 import Actors from './actor';
-import Rooms from './roomSeat';
+import Rooms from '../../sales/roomSeat';
 const Stock = () => {
   let { path } = useRouteMatch();
 

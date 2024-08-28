@@ -6,7 +6,6 @@ const initialState = {
   emailExists: false,
   searchResults: [],
 };
-
 const customerReducer = (state = initialState, action) => {
   switch (action.type) {
     case "FETCH_CUSTOMERS_REQUEST":
@@ -23,6 +22,7 @@ const customerReducer = (state = initialState, action) => {
         emailExists: action.payload,
       };
     case "FETCH_CUSTOMERS_SUCCESS":
+      
       return {
         ...state,
         loading: false,
@@ -48,6 +48,7 @@ const customerReducer = (state = initialState, action) => {
         loading: false,
         searchResults: action.payload,
       };
+      
     case "CLEAR_SEARCH_RESULTS":
       return {
         ...state,

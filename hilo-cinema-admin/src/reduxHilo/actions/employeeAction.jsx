@@ -245,12 +245,13 @@ export const checkEmailExists = (email) => {
     const state = getState();
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+    console.log(token)
     dispatch(checkEmailExistsRequest());
 
     return axios.post(`http://localhost:8000/EmployeeService/CheckEmail`, email, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Site-Type': sysRole || 'default',  // Gửi Site-Type trong header
+        'Site-Type': sysRole || 'default',
         'Content-Type': 'application/json'
       }
     })

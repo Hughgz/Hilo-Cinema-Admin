@@ -10,6 +10,7 @@ import invoiceReducer from "./invoiceReducer";
 import theaterReducer from "./theaterReducer";
 import scheduleReducer from "./scheduleReducer";
 import actorReducer from "./actorReducer";
+import foodReducer from "./foodReducer";
 
 export const allReducers = combineReducers({
     customer : customerReducer,
@@ -22,5 +23,6 @@ export const allReducers = combineReducers({
     invoice : invoiceReducer,
     theater : theaterReducer,
     schedule: scheduleReducer,
-    actor : actorReducer
+    actor : actorReducer,
+    food : foodReducer
 })

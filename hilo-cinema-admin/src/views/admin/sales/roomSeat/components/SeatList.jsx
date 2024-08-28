@@ -1,13 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectSeat, deselectSeat } from "../../../../reduxHilo/actions/bookingAction";
-import { fetchSeatsByRoom } from "../../../../reduxHilo/actions/seatAction";
+import {
+  selectSeat,
+  deselectSeat,
+} from "../../../../../reduxHilo/actions/bookingAction";
+import { fetchSeatsByRoom } from "../../../../../reduxHilo/actions/seatAction";
 import { useColorModeValue } from "@chakra-ui/system";
+import {
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "@chakra-ui/react";
+import AddSeatForm from "./AddSeatForm";
+import EditSeatForm from "./EditSeatForm"; // Import EditSeatForm
 
 export default function SeatList({ roomId, rowNum, colNum }) {
   const dispatch = useDispatch();
   const { seats, loading, error } = useSelector((state) => state.seat);
   const selectedSeats = useSelector((state) => state.booking.selectedSeats);
+  const {
+    isOpen: isSeatModalOpen,
+    onOpen: onSeatModalOpen,
+    onClose: onSeatModalClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isEditModalOpen,
+    onOpen: onEditModalOpen,
+    onClose: onEditModalClose,
+  } = useDisclosure();
+
+  const [selectedSeatId, setSelectedSeatId] = useState(null); // State to store selected seat ID
 
   useEffect(() => {
     if (roomId) {
@@ -15,8 +44,15 @@ export default function SeatList({ roomId, rowNum, colNum }) {
     }
   }, [dispatch, roomId]);
 
+  useEffect(() => {
+    if (selectedSeatId) {
+      dispatch(fetchSeatsByRoom(roomId)); // Cập nhật danh sách ghế sau khi chọn ghế
+    }
+  }, [selectedSeatId, dispatch, roomId]);
+
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
   const textColor = useColorModeValue("black", "white");
+  const seatTextColor = useColorModeValue("black", "white");
 
   const handleSeatClick = (seat) => {
     console.log(`Seat selected: ${seat.id}`);
@@ -25,6 +61,20 @@ export default function SeatList({ roomId, rowNum, colNum }) {
     } else {
       dispatch(selectSeat(seat.id)); // Chọn ghế nếu chưa được chọn
     }
+    setSelectedSeatId(seat.id); // Save selected seat ID
+  };
+
+  const handleEditSeat = () => {
+    if (selectedSeatId) {
+      onEditModalOpen(); // Open Edit Modal
+    } else {
+      alert("Please select a seat to edit.");
+    }
+  };
+
+  const handleSave = () => {
+    dispatch(fetchSeatsByRoom(roomId)); // Cập nhật lại danh sách ghế sau khi lưu
+    onEditModalClose(); // Đóng modal sau khi cập nhật
   };
 
   // Kiểm tra xem ghế có đang được chọn không
@@ -37,7 +87,45 @@ export default function SeatList({ roomId, rowNum, colNum }) {
   }
 
   if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
+    return (
+      <div>
+        <p style={{ color: "red" }}>{error}</p>
+        <div className="flex justify-end mt-5">
+          <Button
+            bg="transparent"
+            color="blue.500"
+            border="1px solid"
+            borderColor="blue.500"
+            _hover={{ bg: "blue.500", color: "white" }}
+            _active={{ bg: "blue.600", color: "white" }}
+            borderRadius="md"
+            boxShadow="md"
+            px={6}
+            py={3}
+            w="full"
+            onClick={onSeatModalOpen} // Mở modal khi nhấn vào nút Add Room
+          >
+            Add Seat
+          </Button>
+        </div>
+        <Modal isOpen={isSeatModalOpen} onClose={onSeatModalClose} size="xl">
+          <ModalOverlay />
+          <ModalContent maxW="90vw">
+            <ModalHeader>Add New Seat</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <AddSeatForm
+                roomId={roomId}
+                rowNum={rowNum}
+                colNum={colNum}
+                onClose={onSeatModalClose}
+              />
+            </ModalBody>
+            <ModalFooter></ModalFooter>
+          </ModalContent>
+        </Modal>
+      </div>
+    );
   }
 
   if (!seats || seats.length === 0) {
@@ -49,6 +137,25 @@ export default function SeatList({ roomId, rowNum, colNum }) {
         <p className="text-center" style={{ color: "red" }}>
           Room này chưa có ghế, vui lòng thêm ghế
         </p>
+        <div className="flex justify-end mt-5">
+          <button
+            className="px-4 py-2 rounded border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white transition duration-300 w-full"
+            onClick={onSeatModalOpen}
+          >
+            Add Seat
+          </button>
+        </div>
+        <Modal isOpen={isSeatModalOpen} onClose={onSeatModalClose} size="xl">
+          <ModalOverlay />
+          <ModalContent maxW="90vw">
+            <ModalHeader>Add New Seat</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <AddSeatForm roomId={roomId} rowNum={rowNum} colNum={colNum} />
+            </ModalBody>
+            <ModalFooter></ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
     );
   }
@@ -152,7 +259,69 @@ export default function SeatList({ roomId, rowNum, colNum }) {
             })}
           </ul>
         </div>
+        <div className="flex justify-end gap-5">
+          <Button
+            variant="outline"
+            colorScheme="gray"
+            size="sm"
+            leftIcon={
+              <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
+            }
+          >
+            Seat Hide
+          </Button>
+          <Button
+            variant="outline"
+            colorScheme="red"
+            size="sm"
+            leftIcon={
+              <span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>
+            }
+          >
+            Seat VIP
+          </Button>
+          <Button
+            variant="outline"
+            colorScheme="blue"
+            size="sm"
+            leftIcon={
+              <span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>
+            }
+          >
+            Seat Couple
+          </Button>
+        </div>
+        <div className="flex justify-between mt-4 gap-5">
+          <Button
+            bg="transparent"
+            color="blue.500"
+            border="1px solid"
+            borderColor="blue.500"
+            _hover={{ bg: "blue.500", color: "white" }}
+            _active={{ bg: "blue.600", color: "white" }}
+            borderRadius="md"
+            boxShadow="md"
+            px={10} // Tăng độ rộng của nút
+            py={3}
+            w={"full"}
+            onClick={handleEditSeat} // Trigger EditSeatForm modal
+          >
+            Edit Seat
+          </Button>
+        </div>
       </div>
+
+      {/* Modal for EditSeatForm */}
+      <Modal isOpen={isEditModalOpen} onClose={onEditModalClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Seat</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <EditSeatForm seatId={selectedSeatId} onClose={handleSave} />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </>
   );
 }

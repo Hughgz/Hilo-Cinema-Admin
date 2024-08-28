@@ -17,12 +17,10 @@ import {
 } from "react-icons/md";
 // Admin Imports
 import MainDashboard from "views/admin/default";
-import Timekeeping from "views/admin/timekeeping";
-import Salary from "views/admin/salary";
 
 // Auth Imports
 import SignInCentered from "views/auth/signIn";
-import Sales from "views/admin/sales";
+
 
 import Movies from "views/admin/stock/components/movie";
 import Theaters from "views/admin/stock/components/theater";
@@ -30,8 +28,10 @@ import Stock from "views/admin/stock/components";
 import Employees from "views/admin/users/components/employees";
 import Users from "views/admin/users";
 import Actors from "views/admin/stock/components/actor";
-import Rooms from "views/admin/stock/components/roomSeat";
 import Customers from "views/admin/users/components/customers";
+import Rooms from "views/admin/sales/roomSeat";
+import Ticket from "views/admin/sales/ticket";
+import Sales from "views/admin/sales";
 
 
 const routes = [
@@ -127,9 +127,32 @@ const routes = [
   {
     name: "Sales Management",
     layout: "/admin",
-    path: "/sale-management",
     icon: <Icon as={MdAccountBalance} width='20px' height='20px' color='inherit' />,
+    path: "/sales",
     component: Sales,
+    routes: [
+      {
+        name: "Rooms",
+        layout: "/admin",
+        icon: <Icon as={MdRoomPreferences} width='20px' height='20px' color='inherit' />,
+        path: "/sales/room",
+        component: Rooms,
+      },
+      {
+        name: "Schedule",
+        layout: "/admin",
+        icon: <Icon as={MdMovie} width='20px' height='20px' color='inherit' />,
+        path: "/sales/movie",
+        component: Movies,
+      },
+      {
+        name: "Ticket",
+        layout: "/admin",
+        icon: <Icon as={MdHome} width='20px' height='20px' color='inherit' />,
+        path: "/sales/ticket",
+        component: Ticket,
+      }
+    ]
   },
   {
     name: "Sign In",

@@ -8,27 +8,27 @@ import {
   FETCH_ACTORS_COUNT_SUCCESS, FETCH_ACTORS_COUNT_FAILURE
 } from "../types/type";
 
-export const fetchActorsRequest = () => ({
+export const fetchProducersRequest = () => ({
   type: FETCH_ACTORS_REQUEST
 });
 
-export const fetchActorsSuccess = (actors) => ({
+export const fetchProducersSuccess = (actors) => ({
   type: FETCH_ACTORS_SUCCESS,
   payload: actors
 });
 
-export const fetchActorsFailure = (error) => ({
+export const fetchProducersFailure = (error) => ({
   type: FETCH_ACTORS_FAILURE,
   payload: error.message || error.toString()
 });
 
-export const fetchActors = () => {
+export const fetchProducers = () => {
   return (dispatch, getState) => {
     const state = getState();
     const token = state.auth.token;
     const sysRole = state.auth.user ? state.auth.user.sysRole : null;
 
-    dispatch(fetchActorsRequest());
+    dispatch(fetchProducersRequest());
 
     return axios.get("http://localhost:8000/ActorService", {
       headers: {
@@ -38,7 +38,7 @@ export const fetchActors = () => {
       }
     })
       .then(response => {
-        dispatch(fetchActorsSuccess(response.data));
+        dispatch(fetch(response.data));
       })
       .catch(error => {
         console.error("There was an error!", error.message);

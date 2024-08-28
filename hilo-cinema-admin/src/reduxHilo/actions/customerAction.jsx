@@ -204,7 +204,7 @@ export const searchCustomersFailure = (error) => ({
   payload: error.message || error.toString(),
 });
 
-export const searchCustomers = (searchValue, searchField) => {
+export const searchCustomers = (phone) => {
   return (dispatch, getState) => {
     const state = getState();
     const token = state.auth.token;
@@ -212,11 +212,7 @@ export const searchCustomers = (searchValue, searchField) => {
 
     dispatch(searchCustomersRequest());
 
-    return axios.get("http://localhost:8000/CustomerService/Search", {
-      params: {
-        searchValue: searchValue,
-        searchField: searchField,
-      },
+    return axios.get(`http://localhost:8000/CustomerService/phone/${phone}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Site-Type': sysRole || 'default',
@@ -224,6 +220,7 @@ export const searchCustomers = (searchValue, searchField) => {
       }
     })
       .then(response => {
+        console.log("Data Search: ", response.data)
         dispatch(searchCustomersSuccess(response.data));
       })
       .catch(error => {
