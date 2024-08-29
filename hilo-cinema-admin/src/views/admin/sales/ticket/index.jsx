@@ -29,7 +29,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 export default function Ticket() {
   const dispatch = useDispatch();
   const history = useHistory();
-  
+
 
   const { movies } = useSelector((state) => state.movie);
   const { user, token } = useSelector((state) => state.auth);
@@ -189,43 +189,43 @@ export default function Ticket() {
     }, []);
 
     return uniqueSchedules.map((schedule) => ({
-      value: `${schedule.date}-${schedule.time}`,
+      value: `${schedule.date} - ${schedule.time}`,
       label: `${schedule.date} - ${schedule.time}`,
       roomId: schedule.roomId,
     }));
   }, [schedules, selectedMovie]);
 
-  // Lấy thông tin chi tiết dựa trên ID đã chọn
-  const theaterName = useMemo(() => {
-    return theaters.find(theater => theater.id === booking.theaterId)?.name || '';
-  }, [theaters, booking.theaterId]);
-
-  const movieDetails = useMemo(() => {
-    return movies.find(movie => movie.id === booking.movieId) || {};
-  }, [movies, booking.movieId]);
-
-  const roomName = useMemo(() => {
-    return rooms.find(room => room.id === booking.roomId)?.name || '';
-  }, [rooms, booking.roomId]);
-
-
-  const customerDetails = useMemo(() => {
-    return customers.find(customer => customer.id === booking.customerId) || {};
-  }, [customers, booking.customerId]);
   const handlePaymentConfirm = () => {
+    // Tách selectedSchedule thành scheduleDate và scheduleTime
+    const [scheduleDate, scheduleTime] = selectedSchedule.split(' - ');
+
     history.push({
-        pathname: '/payment-confirm',
-        state: {
-            theaterId: selectedTheater,
-            movieId: selectedMovie,
-            roomId: selectedRoom ? selectedRoom.id : null,
-            scheduleId: selectedSchedule,
-            selectedSeats: booking.selectedSeats,
-            customerId: booking.customerId,
-            totalAmount: booking.totalAmount
-        }
+      pathname: '/payment-confirm',
+      state: {
+        theaterId: selectedTheater,
+        movieId: selectedMovie,
+        roomId: selectedRoom ? selectedRoom.id : null,
+        scheduleId: selectedSchedule,
+        scheduleDate, // Truyền scheduleDate
+        scheduleTime, // Truyền scheduleTime
+        selectedSeats: booking.selectedSeats,
+        customerId: booking.customerId,
+        totalAmount: booking.totalAmount
+      }
     });
-};
+  };
+
+  const isReadyToContinue = useMemo(() => {
+    return (
+      selectedTheater !== null &&
+      selectedMovie !== null &&
+      selectedSchedule !== null &&
+      selectedRoom !== null &&
+      booking.selectedSeats.length > 0 &&
+      booking.customerId !== null
+    );
+  }, [selectedTheater, selectedMovie, selectedSchedule, selectedRoom, booking.selectedSeats, booking.customerId]);
+
   return (
     <Box pt={{ base: "180px", md: "80px", xl: "80px" }}>
       <Grid
@@ -314,58 +314,25 @@ export default function Ticket() {
               onSelectCustomer={handleSelectCustomer}
             />
           </Card>
-          <Card px="0px" mb="20px">
+          {/* <Card px="0px" mb="20px">
             <TopFoodTable
               foods={foodData}
               loading={foodLoading}
               error={foodError}
               onSelectFood={handleSelectFood}
             />
-          </Card>
+          </Card> */}
         </Flex>
       </Grid>
-        
-
-
-      <Button onClick={handlePaymentConfirm}>Continue</Button>
-
-
-      {/* Payment Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="lg">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Payment Information</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Flex>
-              {/* Hình ảnh nằm bên trái */}
-              {movieDetails.imgSmall && (
-                <Box flex="1">
-                  <img
-                    src={`data:image/jpeg;base64,${movieDetails.imgSmall}`}
-                    alt={movieDetails.title}
-                    style={{ width: '100%', maxWidth: '200px', height: 'auto' }}
-                  />
-                </Box>
-              )}
-
-              {/* Thông tin nằm bên phải */}
-              <Box flex="2" pl={4}>
-                <Text><strong>Theater:</strong> {theaterName}</Text>
-                <Text><strong>Movie:</strong> {movieDetails.title}</Text>
-                <Text><strong>Schedule:</strong> {booking.scheduleId}</Text>
-                <Text><strong>Room:</strong> {roomName}</Text>
-                <Text><strong>Selected Seats:</strong> {booking.selectedSeats.map(seat => seat.name).join(', ')}</Text>
-                <Text><strong>Customer:</strong> {customerDetails.name}</Text>
-                <Text><strong>Selected Foods:</strong> {booking.foodList.map(food => `${food.foodId} (x${food.quantity})`).join(', ')}</Text>
-                <Text><strong>Total Amount:</strong> {booking.totalAmount}</Text>
-              </Box>
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-
-
+      {/* Button handlePaymentConfirm */}
+      {isReadyToContinue && (
+        <button
+          className="px-4 py-2 rounded border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white transition duration-300 w-full"
+          onClick={handlePaymentConfirm}
+        >
+          Continue
+        </button>
+      )}
     </Box>
   );
 }

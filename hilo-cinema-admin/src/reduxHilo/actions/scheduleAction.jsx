@@ -85,7 +85,7 @@ export const fetchSchedulesByMovieId = (movieId) => {
         const sysRole = state.auth.user ? state.auth.user.sysRole : null;
         dispatch(fetchSchedulesRequest());
 
-        return axios.get(`http://localhost:8000/ScheduleService/ByMovieId/${movieId}`, {
+        return axios.get(`http://localhost:8000/ScheduleService/GetScheduleByMovieId/${movieId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Site-Type': sysRole || 'default',

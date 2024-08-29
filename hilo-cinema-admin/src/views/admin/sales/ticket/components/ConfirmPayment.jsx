@@ -7,7 +7,11 @@ import { fetchFoods } from 'reduxHilo/actions/foodAction';
 import { fetchMovies } from 'reduxHilo/actions/movieAction';
 import { fetchRooms } from 'reduxHilo/actions/roomAction';
 import { fetchTheaters } from 'reduxHilo/actions/theaterAction';
-
+import { PaymentConfirmationModal } from './PaymentConfirmationModal';
+import { addInvoice } from 'reduxHilo/actions/invoiceAction';
+import { NavLink } from "react-router-dom";
+import { Flex, Icon, Text } from '@chakra-ui/react';
+import { FaChevronLeft } from "react-icons/fa";
 function ConfirmPayment() {
     const dispatch = useDispatch();
     const location = useLocation();
@@ -18,16 +22,19 @@ function ConfirmPayment() {
     const { theaters } = useSelector((state) => state.theater);
     const { rooms } = useSelector((state) => state.room);
     const { seats } = useSelector((state) => state.seat);
+    const { user, token } = useSelector((state) => state.auth);
     const [selectedFoods, setSelectedFoods] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const {
         theaterId,
         movieId,
         roomId,
         scheduleId,
+        scheduleDate, // Nhận scheduleDate
+        scheduleTime, // Nhận scheduleTime
         selectedSeats = [],
-        customerId,
-        totalAmount
+        customerId
     } = location.state || {};
 
     useEffect(() => {
@@ -37,7 +44,8 @@ function ConfirmPayment() {
         dispatch(fetchTheaters());
         dispatch(fetchMovies());
     }, [dispatch]);
-
+    console.log(scheduleDate)
+    console.log(scheduleTime)
     const theaterDetail = useMemo(() => {
         return theaters.find(theater => theater.id === theaterId) || {};
     }, [theaters, theaterId]);
@@ -120,20 +128,80 @@ function ConfirmPayment() {
         return <p>Error: {error}</p>;
     }
     const totalPayment = totalSeatPrice + totalFoodPrice;
+    const handlePaymentClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmPayment = () => {
+        const invoiceData = {
+            orderId: 1,
+            fullName: customerDetails.name,
+            description: "Order description",
+            amount: totalPayment,
+            createdDate: new Date().toISOString().slice(0, 10), // "YYYY-MM-DD" format for DateOnly
+            invoice: {
+                createdDate: new Date().toISOString().slice(0, 10), // "YYYY-MM-DD" format for DateOnly
+                employeeId: user.id,
+                customerId: customerId,
+                promotionId: null, // or a valid ID if you have one
+                paymentMethod: "Cash",
+                total: totalPayment,
+                seatIds: selectedSeats.map(seat => seat.id),
+                foodRequests: selectedFoods.map(food => ({
+                    foodId: food.id,
+                    quantity: food.quantity
+                })),
+                schedule: {
+                    movieId: movieId,
+                    date: scheduleDate, // ensure this is in "YYYY-MM-DD" format
+                    time: scheduleTime // ensure this is in "HH:MM:SS" format
+                }
+            }
+        };
+
+        console.log("Sending invoice data:", invoiceData);
+
+        dispatch(addInvoice(invoiceData)).then(() => {
+            setIsModalOpen(false);
+            history.push('/payment-success');
+        }).catch((error) => {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+            } else {
+                console.error("Error:", error.message);
+            }
+        });
+    };
+
 
     return (
-        <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
+        <section className="bg-white py-8 antialiased md:py-16">
             <div className="mx-auto max-w-screen-xl px-4 2xl:px-0 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
-                <div className="mb-4">
-                    <button
-                        onClick={() => history.push('/admin/sales/ticket')}
-                        className="bg-primary text-black px-4 py-2 rounded-md hover:bg-primary-700"
-                    >
-                        Quay lại trang trước
-                    </button>
-                </div>
+                <NavLink
+                    to='admin/sales/ticket'
+                    style={() => ({
+                        width: "fit-content",
+                        marginTop: "40px",
+                    })}>
+                    <Flex
+                        align='center'
+                        ps={{ base: "25px", lg: "0px" }}
+                        pt={{ lg: "0px", xl: "0px" }}
+                        w='fit-content'>
+                        <Icon
+                            as={FaChevronLeft}
+                            me='12px'
+                            h='13px'
+                            w='8px'
+                            color='secondaryGray.600'
+                        />
+                        <Text ms='0px' fontSize='sm' color='secondaryGray.600'>
+                            Back to Dashboard
+                        </Text>
+                    </Flex>
+                </NavLink>
                 {/* Payment Information */}
-                <div className="mb-8">
+                <div className="mb-8 mt-3">
                     <h2 className="text-xl font-semibold text-gray-900">PAYMENT INFORMATION</h2>
                     <p className="mt-4 text-gray-700"><strong>Full name:</strong> {customerDetails.name}</p>
                     <p className="text-gray-700"><strong>Phone:</strong> {customerDetails.phone}</p>
@@ -211,7 +279,7 @@ function ConfirmPayment() {
                                             <span className="text-sm xl:text-base">{roomDetail.name}</span>
                                         </div>
                                         <div className="xl:mt-2 text-sm xl:text-base">
-                                            <span>Suất: </span>
+                                            <span>Schedule: </span>
                                             <span className="capitalize text-sm">
                                                 <strong>{scheduleId}</strong>
                                             </span>
@@ -226,9 +294,9 @@ function ConfirmPayment() {
                                             <div key={index} className="flex justify-between text-sm mt-2">
                                                 <div>
                                                     <strong>1x </strong>
-                                                    <span>{seat.type === "standard" ? 'Ghế đơn' : (seat.type === "couple" ? 'Ghế đôi' : 'Ghế VIP')}</span>
+                                                    <span>{seat.type === "standard" ? 'Standard' : (seat.type === "couple" ? 'Couple' : 'VIP')}</span>
                                                     <div>
-                                                        <span>Ghế: </span>
+                                                        <span>Seat: </span>
                                                         <strong>{seat.name}</strong>
                                                     </div>
                                                 </div>
@@ -254,20 +322,32 @@ function ConfirmPayment() {
                                     <div className="my-4 border-t border-black border-dashed xl:block hidden"></div>
                                 </div>
                                 <div className="xl:flex hidden justify-between col-span-3">
-                                    <strong className="text-base">Tổng cộng</strong>
+                                    <strong className="text-base">Total</strong>
                                     <span className="inline-block font-bold text-primary">
                                         {totalPayment.toLocaleString()}&nbsp;₫
                                     </span>
                                 </div>
                             </div>
                             <div className="mt-8 xl:flex hidden">
-                                <button className="w-1/2 mr-2 py-2 text-primary bg-gray-200 hover:bg-gray-300 rounded-md" onClick={() => history.goBack()}>
-                                    <span>Quay lại</span>
+                                <button
+                                    className="px-4 py-2 rounded border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white transition duration-300 w-full"
+                                    onClick={() => history.goBack()}
+                                >
+                                    Back
                                 </button>
-                                <button className="w-1/2 ml-2 py-2 bg-primary text-black border rounded-md hover:bg-primary-700">
-                                    <span>Thanh toán</span>
+
+                                <button
+                                    className="px-4 py-2 rounded border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white transition duration-300 w-full"
+                                    onClick={handlePaymentClick}
+                                >
+                                    Payment
                                 </button>
                             </div>
+                            <PaymentConfirmationModal
+                                isOpen={isModalOpen}
+                                onClose={() => setIsModalOpen(false)}
+                                onConfirm={handleConfirmPayment}
+                            />
                         </div>
                         <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg sm:p-6">
                             <form className="space-y-4">

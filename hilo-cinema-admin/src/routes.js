@@ -13,7 +13,9 @@ import {
   MdCategory,
   MdRoom,
   MdRoomService,
-  MdRoomPreferences
+  MdRoomPreferences,
+  MdMeetingRoom,
+  MdEventSeat
 } from "react-icons/md";
 // Admin Imports
 import MainDashboard from "views/admin/default";
@@ -32,6 +34,9 @@ import Customers from "views/admin/users/components/customers";
 import Rooms from "views/admin/sales/roomSeat";
 import Ticket from "views/admin/sales/ticket";
 import Sales from "views/admin/sales";
+import { FaFileInvoice, FaTicketAlt } from "react-icons/fa";
+import InvoicePage from "views/admin/sales/Invoice/Index";
+import SchedulePage from "views/admin/sales/Schedule/Index";
 
 
 const routes = [
@@ -81,13 +86,6 @@ const routes = [
     component: Stock,
     routes: [
       {
-        name: "Rooms",
-        layout: "/admin",
-        icon: <Icon as={MdRoomPreferences} width='20px' height='20px' color='inherit' />,
-        path: "/stock/room",
-        component: Rooms,
-      },
-      {
         name: "Movies",
         layout: "/admin",
         icon: <Icon as={MdMovie} width='20px' height='20px' color='inherit' />,
@@ -127,33 +125,40 @@ const routes = [
   {
     name: "Sales Management",
     layout: "/admin",
-    icon: <Icon as={MdAccountBalance} width='20px' height='20px' color='inherit' />,
+    icon: <Icon as={MdAccountBalance} width='20px' height='20px' color='inherit' />, // Icon tổng thể Sales Management
     path: "/sales",
     component: Sales,
     routes: [
       {
         name: "Rooms",
         layout: "/admin",
-        icon: <Icon as={MdRoomPreferences} width='20px' height='20px' color='inherit' />,
+        icon: <Icon as={MdMeetingRoom} width='20px' height='20px' color='inherit' />, // Thay đổi icon liên quan đến phòng chiếu
         path: "/sales/room",
         component: Rooms,
       },
       {
         name: "Schedule",
         layout: "/admin",
-        icon: <Icon as={MdMovie} width='20px' height='20px' color='inherit' />,
-        path: "/sales/movie",
-        component: Movies,
+        icon: <Icon as={FaFileInvoice} width='20px' height='20px' color='inherit' />, // Thay đổi icon liên quan đến lịch chiếu phim
+        path: "/sales/schedule",
+        component: SchedulePage,
+      },
+      {
+        name: "Invoice",
+        layout: "/admin",
+        icon: <Icon as={FaFileInvoice} width='20px' height='20px' color='inherit' />, // Thay đổi icon liên quan đến lịch chiếu phim
+        path: "/sales/invoice",
+        component: InvoicePage,
       },
       {
         name: "Ticket",
         layout: "/admin",
-        icon: <Icon as={MdHome} width='20px' height='20px' color='inherit' />,
+        icon: <Icon as={FaTicketAlt} width='20px' height='20px' color='inherit' />, // Thay đổi icon liên quan đến vé xem phim
         path: "/sales/ticket",
         component: Ticket,
       }
     ]
-  },
+  },  
   {
     name: "Sign In",
     layout: "/auth",

@@ -1,11 +1,12 @@
 import { 
     FETCH_INVOICES_REQUEST, FETCH_INVOICES_SUCCESS, 
     FETCH_INVOICES_FAILURE,
-    EDIT_INVOICES_SUCCESS,EDIT_INVOICES_FAILURE,
+    EDIT_INVOICES_SUCCESS, EDIT_INVOICES_FAILURE,
     ADD_INVOICES_SUCCESS, ADD_INVOICES_FAILURE,
     FETCH_INVOICES_COUNT_SUCCESS,
     FETCH_INVOICES_COUNT_FAILURE
-  } from "../types/type";
+} from "../types/type";
+
 const initialState = {
     loading: false,
     invoices: [],
@@ -32,28 +33,18 @@ const invoiceReducer = (state = initialState, action) => {
                 loading: false,
                 error: action.payload
             };
-        // case EDIT_MOVIES_SUCCESS:
-        //     return {
-        //         ...state,
-        //         movies: state.movies.map(mov =>
-        //             mov.id === action.payload.id ? action.payload : mov
-        //         ),
-        //     };
-        // case EDIT_MOVIES_FAILURE:
-        //     return {
-        //         ...state,
-        //         error: action.payload,
-        //     };
-        // case ADD_MOVIES_SUCCESS:
-        //     return {
-        //         ...state,
-        //         movies: [...state.movies, action.payload],
-        //     };
-        // case ADD_MOVIES_FAILURE:
-        //     return {
-        //         ...state,
-        //         error: action.payload,
-        //     };
+        case ADD_INVOICES_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                invoices: [...state.invoices, action.payload], // Thêm invoice mới vào danh sách
+            };
+        case ADD_INVOICES_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+            };
         case FETCH_INVOICES_COUNT_SUCCESS:
             return {
                 ...state,

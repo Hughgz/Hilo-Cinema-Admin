@@ -24,7 +24,7 @@ export const fetchInvoicesFailure = (error) => ({
 export const fetchInvoices = () => {
   return (dispatch) => {
     dispatch(fetchInvoicesRequest());
-    return axios.get("https://localhost:5004/api/Invoice")
+    return axios.get("http://localhost:8000/InvoiceService")
       .then(response => {
         dispatch(fetchInvoicesSuccess(response.data));
       })
@@ -41,7 +41,7 @@ export const fetchGetInvoicesByCustomerId = (customerId) => {
             dispatch(fetchInvoicesSuccess([response.data])); // You can adjust this based on your needs
           })
           .catch(error => {
-            console.error("There was an error fetching movie details!", error);
+            console.error("There was an error fetching invoice details!", error);
             dispatch(fetchInvoicesFailure(error));
           });
       };
@@ -71,7 +71,7 @@ export const editInvoiceFailure = (error) => ({
 
 export const editInvoice = (id, invoiceData) => {
   return (dispatch) => {
-    return axios.put(`https://localhost:5004/api/Invoice/${id}`, invoiceData)
+    return axios.put(`http://localhost:8000/InvoiceService/${id}`, invoiceData)
       .then(response => {
         dispatch(editInvoiceSuccess(response.data));
       })
@@ -82,38 +82,56 @@ export const editInvoice = (id, invoiceData) => {
 };
 export const fetchInvoiceDetails = (id) => {
   return (dispatch) => {
-    return axios.get(`https://localhost:5004/api/Invoice/${id}`)
+    return axios.get(`http://localhost:8000/InvoiceService/${id}`)
       .then(response => {
         dispatch(fetchInvoicesSuccess([response.data])); // You can adjust this based on your needs
       })
       .catch(error => {
-        console.error("There was an error fetching movie details!", error);
+        console.error("There was an error fetching invoice details!", error);
         dispatch(fetchInvoicesFailure(error));
       });
   };
 };
-// //Add
-// export const addMovieSuccess = (movie) => ({
-//   type: ADD_MOVIES_SUCCESS,
-//   payload: movie,
-// });
+//Add
+export const addInvoiceSuccess = (invoice) => ({
+  type: ADD_INVOICES_SUCCESS,
+  payload: invoice,
+});
 
-// export const addMovieFailure = (error) => ({
-//   type: ADD_MOVIES_FAILURE,
-//   payload: error.message || error.toString(),
-// });
+export const addInvoiceFailure = (error) => ({
+  type: ADD_INVOICES_FAILURE,
+  payload: error.message || error.toString(),
+});
 
-// export const addMovie = (movieData) => {
-//   return (dispatch) => {
-//     return axios.post("https://localhost:8000/api/Movies", movieData)
-//       .then(response => {
-//         dispatch(addMovieSuccess(response.data));
-//       })
-//       .catch(error => {
-//         dispatch(addMovieFailure(error));
-//       });
-//   };
-// };
+export const addInvoice = (invoiceData) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const token = state.auth.token;
+    const sysRole = state.auth.user ? state.auth.user.sysRole : null;
+
+    return axios.post("http://localhost:8000/InvoiceService", invoiceData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Site-Type': sysRole || 'default',
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        dispatch(addInvoiceSuccess(response.data));
+      })
+      .catch((error) => {
+        console.error("There was an error!", error.message);
+        if (error.response && error.response.status === 401) {
+          dispatch(addInvoiceFailure("Unauthorized access"));
+        } else if (error.response && error.response.status === 403) {
+          dispatch(addInvoiceFailure("Forbidden access"));
+        } else {
+          dispatch(addInvoiceFailure(error));
+        }
+      });
+  };
+};
+
 
 //Count
 export const fetchInvoicesCountSuccess = (count) => ({

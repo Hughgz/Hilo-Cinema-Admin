@@ -155,32 +155,34 @@ export default function SeatList({ roomId, rowNum, colNum }) {
             })}
           </ul>
         </div>
-        <Button
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-          leftIcon={
-            <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
-          }
-        >
-          Seat Hide
-        </Button>
-        <Button
-          variant="outline"
-          colorScheme="red"
-          size="sm"
-          leftIcon={<span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>}
-        >
-          Seat VIP
-        </Button>
-        <Button
-          variant="outline"
-          colorScheme="blue"
-          size="sm"
-          leftIcon={<span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>}
-        >
-          Seat couple
-        </Button>
+        <div className="flex justify-end gap-5">
+          <Button
+            variant="outline"
+            colorScheme="gray"
+            size="sm"
+            leftIcon={
+              <span className="w-5 h-5 bg-gray-500 inline-block rounded-full"></span>
+            }
+          >
+            Seat Hide
+          </Button>
+          <Button
+            variant="outline"
+            colorScheme="red"
+            size="sm"
+            leftIcon={<span className="w-5 h-5 bg-red-500 inline-block rounded-full"></span>}
+          >
+            Seat VIP
+          </Button>
+          <Button
+            variant="outline"
+            colorScheme="blue"
+            size="sm"
+            leftIcon={<span className="w-5 h-5 bg-blue-500 inline-block rounded-full"></span>}
+          >
+            Seat couple
+          </Button>
+        </div>
       </div>
     </>
   );

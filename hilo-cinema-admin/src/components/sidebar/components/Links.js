@@ -31,7 +31,7 @@ export function SidebarLinks(props) {
         // Handle dropdown menu
         const isOpen = dropdownStates[index] || false;
         return (
-          <Box key={index} mb={route.name === "Stock Management" ? "5px" : "10px"}>
+          <Box key={index} mb={route.name === "Stock Management" ? "5px" : "5px"}>
             <Flex
               align='center'
               justify='space-between'
