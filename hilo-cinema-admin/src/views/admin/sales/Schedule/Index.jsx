@@ -27,7 +27,7 @@ const SchedulePage = () => {
         try {
             const response = await axios.get("http://localhost:8000/TheaterService");
             setTheater(response.data);
-            fetchRooms();
+
         }
         catch (error) {
             console.error("Error fetching theaters:", error);
@@ -58,6 +58,7 @@ const SchedulePage = () => {
                     Site: "admin",
                 },
             });
+            console.log(response.data)
             setSchedules(response.data);
         } catch (error) {
             console.error("Error fetching schedules:", error);
@@ -293,4 +294,4 @@ const SchedulePage = () => {
     );
 };
 
-export default SchedulePage;
+export default SchedulePage

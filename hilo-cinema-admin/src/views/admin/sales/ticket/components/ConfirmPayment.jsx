@@ -175,8 +175,8 @@ function ConfirmPayment() {
 
 
     return (
-        <section className="bg-white py-8 antialiased md:py-16">
-            <div className="mx-auto max-w-screen-xl px-4 2xl:px-0 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
+        <section className="bg-white py-8 antialiased md:py-16" >
+            <div style={{marginLeft : "30px"}}>
                 <NavLink
                     to='admin/sales/ticket'
                     style={() => ({

@@ -1,10 +1,9 @@
-﻿// create.jsx
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Select, Button, Spinner } from "@chakra-ui/react";
 import axios from "axios";
 import PropTypes from "prop-types";
 
-const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
+const CreateScheduleModal = ({ isOpen, onClose, fetchSchedule }) => {
     const [movies, setMovies] = useState([]);
     const [theaters, setTheaters] = useState([]);
     const [rooms, setRooms] = useState([]);
@@ -15,51 +14,60 @@ const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
     const [time, setTime] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const [scrollBehavior] = useState('inside')
+    const [scrollBehavior] = useState('inside');
+
+    useEffect(() => {
+        fetchTheaters();
+        fetchMovie();
+    }, []); // Thêm dependency array để gọi API chỉ một lần khi component mount
 
     const fetchTheaters = async () => {
         try {
             const response = await axios.get("http://localhost:8000/TheaterService");
             setTheaters(response.data);
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Error fetching theaters:", error);
         }
-    }
+    };
+
     const fetchMovie = async () => {
         try {
             const response = await axios.get("http://localhost:8000/MovieService");
             setMovies(response.data);
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Error fetching movies:", error);
         }
-    }
+    };
+
     const fetchRoomByTheaterId = async (theaterId) => {
         try {
             const response = await axios.get(`http://localhost:8000/RoomService/GetRoomByTheater/${theaterId}`);
             setRooms(response.data);
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Error fetching rooms:", error);
         }
-    }
+    };
 
     const handleChooseTheater = (theaterId) => {
         setSelectedTheater(theaterId);
         fetchRoomByTheaterId(theaterId);
-    }
+    };
 
     const onSave = async () => {
+        // Kiểm tra các trường bắt buộc
+        if (!selectedMovie || !selectedTheater || !selectedRoom || !date || !time) {
+            alert("Vui lòng điền đầy đủ thông tin trước khi lưu lịch chiếu.");
+            return;
+        }
+
         setLoading(true);
 
         const formattedDate = new Date(date).toISOString().split('T')[0]; // YYYY-MM-DD
-        const formattedTime = time; 
         const data = {
             theaterId: selectedTheater,
             roomId: selectedRoom,
             date: formattedDate,
-            time: formattedTime,
+            time, // Giờ đã được format đúng cách
             movieId: selectedMovie,
         };
 
@@ -72,17 +80,11 @@ const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
             onClose();
             fetchSchedule();
         } catch (error) {
-            console.error("Error saving movie:", error.response ? error.response.data : error.message);
-        }
-        finally {
+            console.error("Error saving schedule:", error.response ? error.response.data : error.message);
+        } finally {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchTheaters();
-        fetchMovie();
-    });
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size={"xl"} scrollBehavior={scrollBehavior}>
@@ -108,7 +110,8 @@ const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
                         <Select
                             placeholder="Chọn phòng chiếu"
                             value={selectedRoom}
-                            onChange={(e) => setSelectedRoom(e.target.value)}>
+                            onChange={(e) => setSelectedRoom(e.target.value)}
+                        >
                             {rooms.map((room, index) => (
                                 <option key={index} value={room.id}>{room.name}</option>
                             ))}
@@ -116,15 +119,19 @@ const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
                     </FormControl>
                     <FormControl mt={4}>
                         <FormLabel>Ngày chiếu</FormLabel>
-                        <Input type="date" value={date}
-                            onChange={(e) => setDate(e.target.value)} />
+                        <Input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                        />
                     </FormControl>
                     <FormControl mt={4}>
                         <FormLabel>Phim chiếu</FormLabel>
                         <Select
                             placeholder="Chọn phim chiếu"
                             value={selectedMovie}
-                            onChange={(e) => setSelectedMovie(e.target.value)}>
+                            onChange={(e) => setSelectedMovie(e.target.value)}
+                        >
                             {movies.map((movie, index) => (
                                 <option key={index} value={movie.id}>{movie.title}</option>
                             ))}
@@ -132,35 +139,40 @@ const CreateMovieModal = ({ isOpen, onClose, fetchSchedule }) => {
                     </FormControl>
                     <FormControl mt={4}>
                         <FormLabel>Giờ chiếu</FormLabel>
-                        <Input type="time" step="1" amPmAriaLabel="false" lang="en-GB" value={time}
-                            onChange={(e) => setTime(e.target.value)} />
+                        <Input
+                            type="time"
+                            step="1"
+                            amPmAriaLabel="false"
+                            lang="en-GB"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                        />
                     </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                    <ModalFooter>
-                        <Button
-                            colorScheme="blue"
-                            mr={3}
-                            onClick={onSave}
-                            isDisabled={loading} 
-                        >
-                            {loading ? (
-                                <Spinner size="sm" />
-                            ) : (
-                                <span>Save</span>
-                            )}
-                        </Button>
-                        <Button onClick={onClose}>Cancel</Button>
-                    </ModalFooter>
+                    <Button
+                        colorScheme="blue"
+                        mr={3}
+                        onClick={onSave}
+                        isDisabled={loading}
+                    >
+                        {loading ? (
+                            <Spinner size="sm" />
+                        ) : (
+                            <span>Lưu</span>
+                        )}
+                    </Button>
+                    <Button onClick={onClose}>Hủy</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>
     );
 };
 
-CreateMovieModal.propTypes = {
+CreateScheduleModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     fetchSchedule: PropTypes.func.isRequired,
-}
-export default CreateMovieModal;
+};
+
+export default CreateScheduleModal;
