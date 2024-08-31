@@ -27,7 +27,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
-  const { colorMode, toggleColorMode } = useColorMode()
+  const { colorMode, toggleColorMode } = useColorMode();
   // Chakra Color Mode
   const navbarIcon = useColorModeValue("gray.400", "white");
   let menuBg = useColorModeValue("white", "navy.800");
@@ -42,18 +42,21 @@ export default function HeaderLinks(props) {
   //fetch
   const dispatch = useDispatch();
   const history = useHistory();
-  const auth = useSelector(state => state.auth);
+  const auth = useSelector((state) => state.auth);
   const { user, token } = auth;
   console.log("User from Redux store:", user);
   const handleLogout = () => {
     dispatch(logout());
-    history.push('/auth/sign-in'); // Điều hướng đến trang đăng nhập sau khi đăng xuất
+    history.push("/auth/sign-in"); // Điều hướng đến trang đăng nhập sau khi đăng xuất
   };
 
   const handleSignIn = () => {
-    history.push('/auth/sign-in');
+    history.push("/auth/sign-in");
   };
-  
+  const handleBlog = () => {
+    history.push("http://localhost:9000/");
+  };
+
   // console.log("toggleColorMode: ", toggleColorMode)
   // console.log("ColorMode: ", colorMode)
   return (
@@ -153,10 +156,10 @@ export default function HeaderLinks(props) {
         />
       </Button>
       <Menu>
-      <MenuButton p="0px">
+        <MenuButton p="0px">
           {token ? (
             <Text fontSize="md" fontWeight="600" color={textColor}>
-              {user && user.name ? user.name : 'Loading...'}
+              {user && user.name ? user.name : "Loading..."}
             </Text>
           ) : (
             <Link to="/auth/sign-in">
@@ -175,7 +178,7 @@ export default function HeaderLinks(props) {
           border="none"
         >
           <Flex w="100%" mb="0px">
-          <Text
+            <Text
               ps="20px"
               pt="16px"
               pb="10px"
@@ -186,7 +189,7 @@ export default function HeaderLinks(props) {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; Hey, {user ? user.name : 'User'}
+              👋&nbsp; Hey, {user ? user.name : "User"}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
@@ -203,12 +206,9 @@ export default function HeaderLinks(props) {
               _focus={{ bg: "none" }}
               borderRadius="8px"
               px="14px"
+              onClick={() => (window.location.href = "http://localhost:9000/")}
             >
-              <Link to="https://docs.google.com/presentation/d/1oKqzs1Vc2-6YUHzbdO-k42mArnat4WOtGPD-crRL9XA/edit#slide=id.g2f5ac0fc6b2_0_178">
-                <Text fontSize="md" fontWeight="600" color={textColor}>
-                  Sign In
-                </Text>
-            </Link>
+              <Text fontSize="sm">Blog</Text>
             </MenuItem>
             <MenuItem
               _hover={{ bg: "none" }}
@@ -218,15 +218,13 @@ export default function HeaderLinks(props) {
               px="14px"
               onClick={token ? handleLogout : handleSignIn}
             >
-              <Text fontSize="sm">
-                {token ? "Log out" : "Sign In"}
-              </Text>
+              <Text fontSize="sm">{token ? "Log out" : "Sign In"}</Text>
             </MenuItem>
           </Flex>
         </MenuList>
       </Menu>
     </Flex>
-  );  
+  );
 }
 
 HeaderLinks.propTypes = {

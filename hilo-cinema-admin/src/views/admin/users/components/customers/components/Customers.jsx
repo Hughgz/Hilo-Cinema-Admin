@@ -20,7 +20,7 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { fetchCustomers } from "reduxHilo/actions/customerAction"; // Updated imports
+import { fetchCustomers } from "reduxHilo/actions/customerAction";
 import Card from "components/card/Card";
 import EditCustomerForm from "./EditCustomer";
 import CustomerMenu from "components/menu/CustomerMenu";
@@ -37,11 +37,13 @@ export default function CustomerList(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [filterInput, setFilterInput] = useState("");
+  const [phoneFilterInput, setPhoneFilterInput] = useState(""); // State cho số điện thoại
 
-   // State for ModalAlert
-   const [modalVisible, setModalVisible] = useState(false);
-   const [modalMessage, setModalMessage] = useState("");
-   const [modalType, setModalType] = useState("success");
+  // State for ModalAlert
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState("success");
+
   useEffect(() => {
     dispatch(fetchCustomers());
   }, [dispatch]);
@@ -64,8 +66,14 @@ export default function CustomerList(props) {
           ? customer.address &&
             customer.address.toLowerCase().includes(filterInput.toLowerCase())
           : true
+      )
+      .filter((customer) =>
+        phoneFilterInput
+          ? customer.phone &&
+            customer.phone.toLowerCase().includes(phoneFilterInput.toLowerCase())
+          : true
       );
-  }, [customers, filterInput]);
+  }, [customers, filterInput, phoneFilterInput]);
 
   const handleEdit = (row) => {
     setSelectedCustomer(row.original);
@@ -78,13 +86,13 @@ export default function CustomerList(props) {
       console.error("ID is undefined.");
       return;
     }
-  
+
     dispatch(hideCustomer(customerId))
       .then(() => {
         setModalMessage("Customer has been successfully hidden.");
         setModalType("success");
         setModalVisible(true);
-  
+
         // Reload the customers list after successful update
         dispatch(fetchCustomers()).then(() => {
           // Ensure that selectedCustomer is cleared if it no longer exists
@@ -177,6 +185,14 @@ export default function CustomerList(props) {
               </option>
             ))}
           </Select>
+          <input
+            type="text"
+            placeholder="Search by phone number"
+            value={phoneFilterInput}
+            onChange={(e) => setPhoneFilterInput(e.target.value)}
+            className="border px-3 py-2 rounded-lg"
+            maxW="500px"
+          />
         </Flex>
         {loading ? (
           <Text>Loading...</Text>

@@ -106,19 +106,19 @@ const routes = [
         path: "/stock/actor",
         component: Actors,
       },
-      // {
-      //   name: "Producers",
-      //   layout: "/admin",
-      //   icon: <Icon as={MdPeople} width='20px' height='20px' color='inherit' />,
-      //   path: "/stock/producer",
-      //   component: Producers,
-      // },
-      // {
-      //   name: "Categories",
-      //   layout: "/admin",
-      //   icon: <Icon as={MdCategory} width='20px' height='20px' color='inherit' />,
-      //   path: "/stock/category",
-      //   component: Categories,
+      // // {
+      // //   name: "Producers",
+      // //   layout: "/admin",
+      // //   icon: <Icon as={MdPeople} width='20px' height='20px' color='inherit' />,
+      // //   path: "/stock/producer",
+      // //   component: Producers,
+      // // },
+      // // {
+      // //   name: "Categories",
+      // //   layout: "/admin",
+      // //   icon: <Icon as={MdCategory} width='20px' height='20px' color='inherit' />,
+      // //   path: "/stock/category",
+      // //   component: Categories,
       // }
     ]
   },

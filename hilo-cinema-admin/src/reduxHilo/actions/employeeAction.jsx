@@ -191,7 +191,7 @@ export const fetchEmployeesCount = () => {
       const state = getState();
       const token = state.auth.token;  // Giả sử token được lưu trữ trong state.auth.token
 
-      const response = await axios.get('http://localhost:8000/EmployeeService/Count', {
+      const response = await axios.get('http://localhost:8000/EmployeeService/count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },

@@ -65,26 +65,44 @@ const SchedulePage = () => {
         }
     };
 
-    const deleteSchedule = async (movieId, roomId, date, time) => {
+    const deleteSchedule = (movieId, roomId, date, time) => {
         try {
             const url = `http://localhost:8000/ScheduleService/DeleteSchedule?movieId=${encodeURIComponent(movieId)}&roomId=${encodeURIComponent(roomId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`;
     
-            await axios.delete(url);
+            axios.delete(url);
     
             fetchSchedules();
         } catch (error) {
-            console.error("Error deleting schedule:", error);
+            console.error("Error deleting schedule:", error.message);
         }
     };
     
     const checkIsExistInvoiceInSchedule = async (movieId, roomId, date, time) => {
+        // Convert and format time to hh:mm:ss
+        const formatTime = (timeString) => {
+            const timeParts = timeString.split(':');
+            
+            // Ensure the time has exactly 3 parts: [hours, minutes, seconds]
+            if (timeParts.length === 2) {
+                timeParts.push('00'); // Add seconds if missing
+            }
+    
+            const hours = timeParts[0].padStart(2, '0');
+            const minutes = timeParts[1].padStart(2, '0');
+            const seconds = timeParts[2].padStart(2, '0');
+            
+            return `${hours}:${minutes}:${seconds}`;
+        };
+    
         try {
-            const response = axios.post(`http://localhost:8000/ScheduleService/DeleteSchedule?movieId=${encodeURIComponent(movieId)}&roomId=${encodeURIComponent(roomId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`);
+            const formattedTime = formatTime(time);
+            const response = await axios.post(`http://localhost:8000/ScheduleService/CheckIsExistInvoice?movieId=${encodeURIComponent(movieId)}&roomId=${encodeURIComponent(roomId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(formattedTime)}`);
             return response.data;
         } catch (error) {
             console.error("Error checking invoice in schedule:", error);
         }
     }
+    
     const handleChooseSelectedTheater = (theaterId) => {
         setSelectedTheater(theaterId);
         fetchRooms(theaterId);
@@ -142,8 +160,10 @@ const SchedulePage = () => {
             if (hasInvoice) {
                 setIsWarningAlertOpen(true); 
             } else {
-                await deleteSchedule(movieId, roomId, date, time);
+                deleteSchedule(movieId, roomId, date, time);
+                fetchSchedules();
             }
+            
             handleAlertClose();
         }
     };

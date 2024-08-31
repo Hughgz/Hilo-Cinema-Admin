@@ -205,7 +205,7 @@ export const fetchMoviesCount = () => {
       const state = getState();
       const token = state.auth.token;
 
-      const response = await axios.get('http://localhost:8000/MovieService/Count', {
+      const response = await axios.get('http://localhost:8000/MovieService/count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },

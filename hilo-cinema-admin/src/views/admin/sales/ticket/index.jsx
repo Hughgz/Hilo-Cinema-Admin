@@ -37,7 +37,6 @@ export default function Ticket() {
   const { theaters } = useSelector((state) => state.theater);
   const { rooms } = useSelector((state) => state.room);
   const { schedules } = useSelector((state) => state.schedule);
-  const { foods: foodData, loading: foodLoading, error: foodError } = useSelector((state) => state.food);
   const booking = useSelector((state) => state.booking);
 
   const [selectedTheater, setSelectedTheater] = useState(null);
@@ -181,7 +180,7 @@ export default function Ticket() {
     }
 
     const uniqueSchedules = schedules.reduce((acc, schedule) => {
-      const key = `${schedule.date}-${schedule.time}`;
+      const key = `${schedule.date} - ${schedule.time}`;
       if (!acc.some(item => item.date === schedule.date && item.time === schedule.time)) {
         acc.push(schedule);
       }

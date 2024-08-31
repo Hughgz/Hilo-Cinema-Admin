@@ -150,7 +150,7 @@ export const fetchInvoicesCount = () => {
       const state = getState();
       const token = state.auth.token;
 
-      const response = await axios.get('https://localhost:5004/api/Schedule/Count', {
+      const response = await axios.get('https://localhost:5004/api/Invoice/count', {
         headers: {
           'Authorization': `Bearer ${token}`,  // Thêm token vào header của yêu cầu
         },
